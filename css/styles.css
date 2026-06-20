@@ -1064,6 +1064,48 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.15; font-weight: 700; }
 .u-max-560 { max-width: 560px; }
 .u-max-720 { max-width: 720px; }
 
+/* Donors */
+.c-donors {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+.c-donors__text {
+  flex: 1;
+  min-width: 260px;
+  font-size: 0.875rem;
+  color: var(--color-text-soft);
+  line-height: 1.7;
+  border-left: 3px solid var(--color-olive-dark);
+  padding-left: 1.25rem;
+}
+.c-donors__logos {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.c-donors__logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(20%);
+  opacity: 0.85;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+.c-donors__logo:hover {
+  opacity: 1;
+  filter: grayscale(0%);
+}
+
+@media (max-width: 768px) {
+  .c-donors { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+  .c-donors__logos { gap: 1.5rem; }
+  .c-donors__logo { height: 36px; }
+}
+
 /* Divider */
 .c-divider {
   height: 4px;
