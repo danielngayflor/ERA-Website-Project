@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>News &amp; Publications — Environmental Rights Africa (ERA)</title>
-  <meta name="description" content="Stories from the frontline of Africa's environmental rights movement." />
+  <title>Resource Hub — Environmental Rights Africa (ERA)</title>
+  <meta name="description" content="Stories, case studies, newsletters, opinion pieces, and curated external resources on environmental rights across Africa." />
   <link rel="icon" href="images/era-logo.jpeg" type="image/jpeg" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -13,9 +13,8 @@
   <header class="l-header" role="banner">
     <div class="l-header__utility">
       <div class="l-constrain">
-        <a href="join.html" class="c-utility-link">Join the Movement</a>
         <a href="contact.html" class="c-utility-link">Contact</a>
-        <a href="https://web.facebook.com/profile.php?id=61587246567665" target="_blank" rel="noopener" class="c-utility-link">Facebook</a>
+        <a href="https://web.facebook.com/profile.php?id=61587246567665" target="_blank" rel="noopener" class="c-utility-link" aria-label="Facebook"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;"><path d="M24 12.073C24 5.406 18.627 0 12 0S0 5.406 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047v-2.66c0-3.025 1.79-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.971h-1.513c-1.491 0-1.956.93-1.956 1.887v2.263h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg></a>
       </div>
     </div>
     <div class="l-header__navbar">
@@ -40,11 +39,11 @@
           <div class="c-nav__item">
             <a href="regions.html" class="c-nav__link">Regions <svg viewBox="0 0 10 6"><path d="M0 0l5 6 5-6z"/></svg></a>
             <ul class="c-nav__dropdown">
-              <li><a href="regions.html#west-africa">West Africa</a></li>
-              <li><a href="regions.html#north-africa">North Africa</a></li>
-              <li><a href="regions.html#east-africa">East Africa</a></li>
-              <li><a href="regions.html#central-africa">Central Africa</a></li>
-              <li><a href="regions.html#southern-africa">Southern Africa</a></li>
+              <li><a href="region-west.html">West Africa</a></li>
+              <li><a href="region-north.html">North Africa</a></li>
+              <li><a href="region-east.html">East Africa</a></li>
+              <li><a href="region-central.html">Central Africa</a></li>
+              <li><a href="region-southern.html">Southern Africa</a></li>
             </ul>
           </div>
           <div class="c-nav__item">
@@ -52,11 +51,12 @@
             <ul class="c-nav__dropdown">
               <li><a href="about.html#mission">Our Mission</a></li>
               <li><a href="about.html#governance">Governance</a></li>
+              <li><a href="about.html#secretariat">The Secretariat</a></li>
               <li><a href="about.html#leaders">Our Leaders</a></li>
             </ul>
           </div>
           <div class="c-nav__item">
-            <a href="news.html" class="c-nav__link is-active">News &amp; Publications</a>
+            <a href="news.html" class="c-nav__link is-active">Resource Hub</a>
           </div>
           <a href="join.html" class="c-button c-nav__cta">Join the Movement</a>
         </nav>
@@ -69,7 +69,7 @@
     <a href="campaigns.html">Campaigns</a>
     <a href="regions.html">Regions</a>
     <a href="about.html">About ERA</a>
-    <a href="news.html">News &amp; Publications</a>
+    <a href="news.html">Resource Hub</a>
     <a href="join.html">Join the Movement</a>
     <a href="contact.html">Contact</a>
   </nav>
@@ -78,103 +78,125 @@
 
     <div class="c-page-header" style="background-image: url('images/WhatsApp Image 2025-12-07 at 10.54.06 AM.jpeg'); background-size: cover; background-position: center; background-blend-mode: multiply;">
       <div class="l-constrain">
-        <p class="t-eyebrow" style="color:var(--color-olive);">News &amp; Publications</p>
-        <h1 class="c-page-header__title">Stories from the frontline of Africa's environmental rights movement.</h1>
+        <p class="t-eyebrow" style="color:var(--color-olive);">Resource Hub</p>
+        <h1 class="c-page-header__title">Stories, research, and resources on environmental rights across Africa.</h1>
+        <p class="c-page-header__lead">ERA's resource hub brings together field reports, case studies, newsletters, and curated external content — a living library for the environmental rights movement.</p>
       </div>
     </div>
 
     <div class="c-divider"></div>
 
-    <!-- FEATURED ARTICLE -->
-    <section class="l-section theme-default" id="dakar-forum">
+    <section class="l-section theme-default" id="hub">
       <div class="l-constrain">
-        <div class="l-grid-article" style="display:grid; grid-template-columns:2fr 1fr; gap:4rem; align-items:start;">
 
-          <!-- Article body -->
-          <article>
-            <p style="font-family:var(--font-condensed); font-size:0.75rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-terra); margin-bottom:0.75rem;">Feature Report</p>
-            <h1 style="font-family:var(--font-serif); font-size:clamp(1.75rem,3.5vw,2.75rem); font-weight:700; line-height:1.1; color:var(--color-forest); margin-bottom:var(--space-md);">Confronting Africa's Extractive Injustices</h1>
-            <div class="c-article-meta">
-              <span class="c-article-meta__author">By Peter Quaqua, Head of Secretariat</span>
-              <span class="c-article-meta__date">5th Continental Forum, Dakar, Senegal</span>
+        <div class="c-hub-filters" role="group" aria-label="Filter by category">
+          <button class="c-hub-filter is-active" data-filter="all">All</button>
+          <button class="c-hub-filter" data-filter="story">Stories</button>
+          <button class="c-hub-filter" data-filter="casestudy">Case Studies</button>
+          <button class="c-hub-filter" data-filter="newsletter">ERA Magazines</button>
+          <button class="c-hub-filter" data-filter="opinion">Opinion Pieces</button>
+          <button class="c-hub-filter" data-filter="external">External Resources</button>
+        </div>
+
+        <div class="c-hub-grid" id="hubGrid">
+
+          <div class="c-resource-card" data-category="story" id="dakar-forum">
+            <img class="c-resource-card__img" src="images/WhatsApp Image 2025-12-07 at 10.54.06 AM.jpeg" alt="5th Continental Forum, Dakar" />
+            <div class="c-resource-card__body">
+              <span class="c-resource-card__tag">Story</span>
+              <h2 class="c-resource-card__title">Confronting Africa's Extractive Injustices</h2>
+              <p class="c-resource-card__meta">By Peter Quaqua · 5th Continental Forum, Dakar</p>
+              <p class="c-resource-card__excerpt">Inside the forum where the question on the table was simple: will Africa finally benefit from its own resources? A report from the frontline of extractive governance.</p>
             </div>
-
-            <div class="c-article">
-              <p>As the global race for critical minerals intensifies in response to the energy transition and digital transformation, Africa once again finds itself at the center of global economic competition. From lithium and cobalt to graphite and rare earth minerals, the continent's vast natural wealth is increasingly viewed as indispensable to powering the technologies of the future. Yet for many African communities, this growing demand also revives painful questions about exploitation, dispossession, and environmental harm.</p>
-
-              <p>Beneath the growing excitement around critical minerals lies a familiar concern: will Africa finally benefit equitably from its resources, or will history repeat itself through extractive models that enrich others while leaving communities dispossessed, ecosystems degraded, and rights violated?</p>
-
-              <p>These questions were central to discussions at the 5th Continental Forum on Extractive Industries, Business, Human Rights and Environment in Africa, convened in Dakar, Senegal, by the Working Group on Extractive Industries, Environment and Human Rights Violations in Africa of the African Commission on Human and Peoples' Rights (ACHPR).</p>
-
-              <p>Held under the theme, <em>"Advancing Responsible Extractive Governance in Africa and in the Context of the Global Rush for Critical Minerals: Insights from 40 Years of Promotion of the African Charter,"</em> the Forum brought together state representatives, African Union institutions, national human rights institutions, civil society organizations, affected communities, academics, and legal experts.</p>
-
-              <h2>Reclaiming Sovereignty Over Natural Resources</h2>
-
-              <p>One of the clearest messages emerging from Dakar was the reaffirmation of the principle contained in Article 21 of the African Charter on Human and Peoples' Rights: that peoples have the right to freely dispose of their wealth and natural resources.</p>
-
-              <p>Participants stressed that Africa's minerals must first serve the interests of African peoples. This includes ensuring fair licensing agreements, local beneficiation and value addition, transparent governance, and the use of extractive revenues to advance social and economic development.</p>
-
-              <p>Discussions reflected growing concern that the global race for critical minerals risks reproducing long-standing extractive inequalities under a new "green" label. The energy transition, while necessary, cannot become another justification for exploitation without accountability.</p>
-
-              <p>Speakers emphasized the need for Africa to strengthen its negotiating power and develop a common continental position on critical minerals governance. Proposals included the establishment of an <strong>African Strategic Resources Authority</strong> and stronger coordination through African Union institutions.</p>
-
-              <h2>Human Rights Cannot Be Secondary</h2>
-
-              <p>A recurring theme throughout the Forum was that development cannot come at the expense of human dignity and environmental protection.</p>
-
-              <p>Communities affected by extractive operations continue to face displacement, pollution, loss of livelihoods, restricted access to water, and shrinking civic space. Environmental defenders, journalists, and activists raising concerns about extractive projects are increasingly exposed to intimidation, criminalization, and violence.</p>
-
-              <p>The Forum therefore reaffirmed the importance of procedural rights, including access to information, public participation, freedom of expression, and the principle of free, prior, and informed consent.</p>
-
-              <p>Participants stressed that local communities — particularly women, youth, Indigenous populations, and marginalized groups — must be meaningfully involved in decisions affecting their lands and resources. Equally important was the recognition that communities whose rights are violated must have access to effective remedies and justice mechanisms.</p>
-
-              <h2>From Voluntary Commitments to Binding Obligations</h2>
-
-              <p>One of the most significant discussions in Dakar focused on corporate accountability. For years, much of the global conversation around business and human rights has relied heavily on voluntary standards and corporate social responsibility initiatives. Participants emphasized, however, that voluntary approaches, while important, are no substitute for binding legal obligations and enforceable accountability mechanisms.</p>
-
-              <p>The Dakar Declaration calls for stronger legal obligations on corporations operating in Africa, including mandatory human rights and environmental due diligence across supply chains.</p>
-
-              <p>Participants also supported advancing a binding African legal instrument on the regulation of transnational corporations and other business enterprises. There was also renewed support for the ratification of the <strong>Malabo Protocol</strong>, which extends the jurisdiction of the future African Court of Justice and Human Rights to include legal persons such as corporations.</p>
-
-              <h2>The Growing Role of African Institutions</h2>
-
-              <p>The Forum highlighted the increasingly important role African institutions are playing in shaping normative frameworks on environmental rights and extractive governance. The African Commission's Working Group on Extractive Industries continues to emerge as a key platform for advancing regional standards and accountability mechanisms.</p>
-
-              <p>Participants also emphasized the need to integrate human rights standards into broader African Union policy frameworks, including Agenda 2063, the Africa Mining Vision, and the African Continental Free Trade Area (AfCFTA).</p>
-
-              <h2>A Defining Moment for Africa</h2>
-
-              <p>The Dakar Forum demonstrated that Africa stands at an important junction. The continent has an opportunity to redefine the governance of natural resources in ways that prioritize people, protect the environment, strengthen democratic participation, and advance sustainable development.</p>
-
-              <p>The global demand for critical minerals may shape the future of technology and clean energy, but Africa's future should not be determined solely by global markets or geopolitical competition. Instead, it should be guided by the aspirations of African peoples and the principles enshrined in the African Charter on Human and Peoples' Rights.</p>
-
-              <p><strong>The message from Dakar was unmistakable: Africa's critical minerals transition must be rights-based, people-centered, and environmentally just.</strong> If the global green transition is built on the same patterns of exploitation and inequality that have historically characterized extractive industries, then the promise of a sustainable future will remain fundamentally compromised.</p>
+            <div class="c-resource-card__footer">
+              <a href="story-dakar.html" class="c-resource-card__link">Read the Story →</a>
             </div>
-          </article>
+          </div>
 
-          <!-- Sidebar -->
-          <aside style="position:sticky; top:calc(var(--utility-height) + var(--nav-height) + 2rem);">
-            <div style="padding:var(--space-lg); background:var(--color-gray-1); border-top:4px solid var(--color-forest); margin-bottom:1.5rem;">
-              <p style="font-family:var(--font-condensed); font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-terra); margin-bottom:0.75rem;">More From ERA</p>
-              <p style="font-size:0.875rem; color:var(--color-text-soft); line-height:1.6; margin-bottom:var(--space-md);">Additional field reports, newsletters, press releases, and policy publications will be listed here as they are shared.</p>
-              <p style="font-family:var(--font-condensed); font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text-muted); margin-bottom:0.5rem;">Categories</p>
-              <ul style="display:flex; flex-direction:column; gap:0.4rem;">
-                <li><a href="#" style="font-size:0.875rem; color:var(--color-forest); font-weight:500;">Press Releases</a></li>
-                <li><a href="#" style="font-size:0.875rem; color:var(--color-forest); font-weight:500;">Field Reports</a></li>
-                <li><a href="#" style="font-size:0.875rem; color:var(--color-forest); font-weight:500;">Defender Stories</a></li>
-                <li><a href="#" style="font-size:0.875rem; color:var(--color-forest); font-weight:500;">Policy &amp; Research</a></li>
-              </ul>
+          <div class="c-resource-card c-resource-card--external" data-category="external">
+            <div class="c-resource-card__body">
+              <span class="c-resource-card__tag">External Resource</span>
+              <h2 class="c-resource-card__title">African Charter on Human and Peoples' Rights — Article 21</h2>
+              <p class="c-resource-card__meta">African Commission on Human and Peoples' Rights</p>
+              <p class="c-resource-card__excerpt">The foundational legal text recognizing that peoples have the right to freely dispose of their wealth and natural resources — the basis for ERA's advocacy.</p>
             </div>
-            <div style="padding:var(--space-lg); background:var(--color-forest); color:var(--color-white);">
-              <p style="font-family:var(--font-serif); font-size:1rem; font-weight:700; color:var(--color-olive); margin-bottom:0.75rem;">Get future stories first.</p>
-              <p style="font-size:0.875rem; color:rgba(255,255,255,0.78); margin-bottom:var(--space-md); line-height:1.6;">Follow ERA on Facebook to stay close to the campaign and amplify defenders' stories.</p>
-              <a href="https://web.facebook.com/profile.php?id=61587246567665" target="_blank" rel="noopener" class="c-button c-button--secondary" style="width:100%; text-align:center; display:block;">Follow on Facebook →</a>
-              <div style="margin-top:1rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
-                <a href="join.html" class="c-button c-button--primary" style="width:100%; text-align:center; display:block;">Join the Movement →</a>
-              </div>
+            <div class="c-resource-card__footer">
+              <a href="https://www.achpr.org/legalinstruments/detail?id=49" target="_blank" rel="noopener" class="c-resource-card__link">Visit Source →</a>
+              <span class="c-resource-card__ext-badge">External ↗</span>
             </div>
-          </aside>
+          </div>
 
+          <div class="c-resource-card c-resource-card--opinion" data-category="opinion">
+            <div class="c-resource-card__body">
+              <span class="c-resource-card__tag">Opinion Piece</span>
+              <h2 class="c-resource-card__title">Why Africa Needs a Binding Environmental Rights Framework Now</h2>
+              <p class="c-resource-card__meta">ERA Secretariat</p>
+              <p class="c-resource-card__excerpt">Voluntary commitments and corporate social responsibility have proven insufficient. The time for binding legal obligations is not coming — it is here.</p>
+            </div>
+            <div class="c-resource-card__footer">
+              <span style="font-size:0.8rem; color:var(--color-text-muted);">Coming soon</span>
+            </div>
+          </div>
+
+          <div class="c-resource-card c-resource-card--newsletter" data-category="newsletter">
+            <div class="c-resource-card__body">
+              <span class="c-resource-card__tag">ERA Magazine</span>
+              <h2 class="c-resource-card__title">ERA Bulletin — Issue 1</h2>
+              <p class="c-resource-card__meta">Environmental Rights Africa</p>
+              <p class="c-resource-card__excerpt">Our inaugural newsletter covering coalition milestones, field updates from all five sub-regions, and the latest on the campaign for a binding regional agreement.</p>
+            </div>
+            <div class="c-resource-card__footer">
+              <span style="font-size:0.8rem; color:var(--color-text-muted);">Coming soon</span>
+            </div>
+          </div>
+
+          <div class="c-resource-card c-resource-card--casestudy" data-category="casestudy">
+            <div class="c-resource-card__body">
+              <span class="c-resource-card__tag">Case Study</span>
+              <h2 class="c-resource-card__title">Toxic Waste Discharge in Liberia: A Pattern of Impunity</h2>
+              <p class="c-resource-card__meta">ERA Case Studies Working Group</p>
+              <p class="c-resource-card__excerpt">How millions of gallons of toxic waste discharged into Liberian waterways exposed communities to harm — and how residents who protested were met with arrests rather than accountability.</p>
+            </div>
+            <div class="c-resource-card__footer">
+              <span style="font-size:0.8rem; color:var(--color-text-muted);">Coming soon</span>
+            </div>
+          </div>
+
+          <div class="c-resource-card c-resource-card--external" data-category="external">
+            <div class="c-resource-card__body">
+              <span class="c-resource-card__tag">External Resource</span>
+              <h2 class="c-resource-card__title">Global Witness: Defending Tomorrow</h2>
+              <p class="c-resource-card__meta">Global Witness · Annual Report on Defender Killings</p>
+              <p class="c-resource-card__excerpt">The annual report documenting attacks on land and environmental defenders worldwide — with Africa consistently among the most dangerous regions for frontline activists.</p>
+            </div>
+            <div class="c-resource-card__footer">
+              <a href="https://www.globalwitness.org/en/campaigns/environmental-activists/" target="_blank" rel="noopener" class="c-resource-card__link">Visit Source →</a>
+              <span class="c-resource-card__ext-badge">External ↗</span>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="c-hub-empty" id="hubEmpty">No resources in this category yet — check back soon.</p>
+
+        <div style="margin-top:var(--space-2xl); padding:var(--space-lg); background:var(--color-gray-1); border-left:4px solid var(--color-terra); display:flex; gap:2rem; align-items:center; flex-wrap:wrap;">
+          <div style="flex:1; min-width:240px;">
+            <p style="font-family:var(--font-condensed); font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-terra); margin-bottom:0.4rem;">Share a Resource</p>
+            <p style="font-size:0.9rem; color:var(--color-text-soft); line-height:1.6;">Have an article, report, or external link relevant to environmental rights in Africa? Send us the link and we'll consider adding it to the hub.</p>
+          </div>
+          <a href="contact.html" class="c-button c-button--terra-outline" style="flex-shrink:0;">Submit a Resource →</a>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="c-banner theme-forest">
+      <div class="l-constrain">
+        <h2 class="c-banner__title" style="color:var(--color-olive);">Stay close to the movement.</h2>
+        <p class="c-banner__text">Follow ERA on Facebook for the latest field updates, campaign news, and defender stories as they happen.</p>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;">
+          <a href="https://web.facebook.com/profile.php?id=61587246567665" target="_blank" rel="noopener" class="c-button c-button--secondary">Follow on Facebook →</a>
+          <a href="join.html" class="c-button c-button--primary">Join the Movement →</a>
         </div>
       </div>
     </section>
@@ -209,18 +231,18 @@
         <div class="l-footer__col">
           <h4>Regions</h4>
           <ul>
-            <li><a href="regions.html#west-africa">West Africa</a></li>
-            <li><a href="regions.html#north-africa">North Africa</a></li>
-            <li><a href="regions.html#east-africa">East Africa</a></li>
-            <li><a href="regions.html#central-africa">Central Africa</a></li>
-            <li><a href="regions.html#southern-africa">Southern Africa</a></li>
+            <li><a href="region-west.html">West Africa</a></li>
+            <li><a href="region-north.html">North Africa</a></li>
+            <li><a href="region-east.html">East Africa</a></li>
+            <li><a href="region-central.html">Central Africa</a></li>
+            <li><a href="region-southern.html">Southern Africa</a></li>
           </ul>
         </div>
         <div class="l-footer__col">
           <h4>About</h4>
           <ul>
             <li><a href="about.html">Our Mission</a></li>
-            <li><a href="news.html">News &amp; Publications</a></li>
+            <li><a href="news.html">Resource Hub</a></li>
             <li><a href="join.html">Join the Movement</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
@@ -234,5 +256,25 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <script>
+    const filters = document.querySelectorAll('.c-hub-filter');
+    const cards = document.querySelectorAll('.c-resource-card');
+    const emptyMsg = document.getElementById('hubEmpty');
+
+    filters.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filters.forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        const cat = btn.dataset.filter;
+        let visible = 0;
+        cards.forEach(card => {
+          const show = cat === 'all' || card.dataset.category === cat;
+          card.style.display = show ? 'flex' : 'none';
+          if (show) visible++;
+        });
+        emptyMsg.style.display = visible === 0 ? 'block' : 'none';
+      });
+    });
+  </script>
 </body>
 </html>

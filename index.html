@@ -15,9 +15,9 @@
   <header class="l-header" role="banner">
     <div class="l-header__utility">
       <div class="l-constrain">
-        <a href="join.html" class="c-utility-link">Join the Movement</a>
+
         <a href="contact.html" class="c-utility-link">Contact</a>
-        <a href="https://web.facebook.com/profile.php?id=61587246567665" target="_blank" rel="noopener" class="c-utility-link">Facebook</a>
+        <a href="https://web.facebook.com/profile.php?id=61587246567665" target="_blank" rel="noopener" class="c-utility-link" aria-label="Facebook"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;"><path d="M24 12.073C24 5.406 18.627 0 12 0S0 5.406 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047v-2.66c0-3.025 1.79-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.971h-1.513c-1.491 0-1.956.93-1.956 1.887v2.263h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg></a>
       </div>
     </div>
     <div class="l-header__navbar">
@@ -46,12 +46,11 @@
               <svg viewBox="0 0 10 6"><path d="M0 0l5 6 5-6z"/></svg>
             </a>
             <ul class="c-nav__dropdown">
-              <li><a href="regions.html#west-africa">West Africa</a></li>
-              <li><a href="regions.html#north-africa">North Africa</a></li>
-              <li><a href="regions.html#east-africa">East Africa</a></li>
-              <li><a href="regions.html#central-africa">Central Africa</a></li>
-              <li><a href="regions.html#southern-africa">Southern Africa</a></li>
-              <li><a href="regions.html#secretariat">Secretariat — Liberia</a></li>
+              <li><a href="region-west.html">West Africa</a></li>
+              <li><a href="region-north.html">North Africa</a></li>
+              <li><a href="region-east.html">East Africa</a></li>
+              <li><a href="region-central.html">Central Africa</a></li>
+              <li><a href="region-southern.html">Southern Africa</a></li>
             </ul>
           </div>
           <div class="c-nav__item">
@@ -62,11 +61,12 @@
               <li><a href="about.html#mission">Our Mission</a></li>
               <li><a href="about.html#why">Why Environmental Rights</a></li>
               <li><a href="about.html#governance">Governance</a></li>
+              <li><a href="about.html#secretariat">The Secretariat</a></li>
               <li><a href="about.html#leaders">Our Leaders</a></li>
             </ul>
           </div>
           <div class="c-nav__item">
-            <a href="news.html" class="c-nav__link">News &amp; Publications</a>
+            <a href="news.html" class="c-nav__link">Resource Hub</a>
           </div>
           <a href="join.html" class="c-button c-nav__cta">Join the Movement</a>
         </nav>
@@ -88,14 +88,14 @@
     </div>
     <a href="regions.html">Regions</a>
     <div class="c-mobile-nav__sub">
-      <a href="regions.html#west-africa">West Africa</a>
-      <a href="regions.html#east-africa">East Africa</a>
-      <a href="regions.html#north-africa">North Africa</a>
-      <a href="regions.html#central-africa">Central Africa</a>
-      <a href="regions.html#southern-africa">Southern Africa</a>
+      <a href="region-west.html">West Africa</a>
+      <a href="region-north.html">North Africa</a>
+      <a href="region-east.html">East Africa</a>
+      <a href="region-central.html">Central Africa</a>
+      <a href="region-southern.html">Southern Africa</a>
     </div>
     <a href="about.html">About ERA</a>
-    <a href="news.html">News &amp; Publications</a>
+    <a href="news.html">Resource Hub</a>
     <a href="join.html">Join the Movement</a>
     <a href="contact.html">Contact</a>
   </nav>
@@ -251,45 +251,125 @@
     <!-- FROM THE FIELD -->
     <section class="l-section theme-default">
       <div class="l-constrain">
-        <div class="l-section__header">
-          <p class="t-eyebrow">From the Field</p>
-          <h2 class="t-headline">Latest from ERA</h2>
-        </div>
-        <div class="l-cards l-cards--3">
-          <div class="c-card c-card--featured" style="grid-column: span 2;">
-            <div class="c-card__media">
-              <img src="images/WhatsApp Image 2025-12-07 at 10.54.06 AM.jpeg" alt="ERA Continental Forum in Dakar" />
-            </div>
-            <div class="c-card__content" style="background:var(--color-forest); padding:2rem;">
-              <span class="c-card__tag" style="color:var(--color-olive);">Feature Report</span>
-              <h3 class="c-card__title" style="color:var(--color-white); font-size:1.5rem;">Confronting Africa's Extractive Injustices</h3>
-              <p class="c-card__excerpt" style="color:rgba(255,255,255,0.78);">Inside the 5th Continental Forum on Extractive Industries in Dakar, where the question on the table was simple: will Africa finally benefit from its own resources?</p>
-              <p style="font-size:0.8rem; color:var(--color-olive); margin-top:0.5rem; font-weight:500;">By Peter Quaqua, Head of Secretariat</p>
-              <a href="news.html#dakar-forum" class="c-card__link" style="color:var(--color-olive);">Read the Story</a>
-            </div>
+        <div class="l-section__header" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <p class="t-eyebrow">From the Field</p>
+            <h2 class="t-headline">Latest from ERA</h2>
           </div>
-          <div style="display:flex; flex-direction:column; gap:1.5rem;">
-            <div class="c-card">
-              <div class="c-card__content">
-                <span class="c-card__tag">Campaigns</span>
-                <h3 class="c-card__title">Building a Binding Regional Agreement</h3>
-                <p class="c-card__excerpt">ERA advances a legal instrument guaranteeing access to information, participation, and justice — holding both states and corporations accountable.</p>
-                <a href="campaigns.html#binding-agreement" class="c-card__link">Learn More</a>
+          <a href="news.html" class="c-button c-button--terra-outline">All Resources →</a>
+        </div>
+
+        <div class="c-field-slider" id="fieldSlider">
+
+          <!-- Slide 1 -->
+          <div class="c-field-slide is-active">
+            <div class="c-card c-card--featured" style="grid-column: span 2;">
+              <div class="c-card__media">
+                <img src="images/WhatsApp Image 2025-12-07 at 10.54.06 AM.jpeg" alt="ERA Continental Forum in Dakar" />
+              </div>
+              <div class="c-card__content" style="background:var(--color-forest); padding:2rem;">
+                <span class="c-card__tag" style="color:var(--color-olive);">Story</span>
+                <h3 class="c-card__title" style="color:var(--color-white); font-size:1.5rem;">Confronting Africa's Extractive Injustices</h3>
+                <p class="c-card__excerpt" style="color:rgba(255,255,255,0.78);">Inside the 5th Continental Forum on Extractive Industries in Dakar, where the question on the table was simple: will Africa finally benefit from its own resources?</p>
+                <p style="font-size:0.8rem; color:var(--color-olive); margin-top:0.5rem; font-weight:500;">By Peter Quaqua, Head of Secretariat</p>
+                <a href="story-dakar.html" class="c-card__link" style="color:var(--color-olive);">Read the Story</a>
               </div>
             </div>
-            <div class="c-card">
-              <div class="c-card__content">
-                <span class="c-card__tag">Defenders</span>
-                <h3 class="c-card__title">Protecting Those Who Protect the Land</h3>
-                <p class="c-card__excerpt">Environmental defenders are facing arrest, intimidation, and violence. ERA coordinates rapid response and solidarity across the continent.</p>
-                <a href="campaigns.html#defending-defenders" class="c-card__link">Learn More</a>
+            <div style="display:flex; flex-direction:column; gap:1.5rem;">
+              <div class="c-card">
+                <div class="c-card__content">
+                  <span class="c-card__tag">Campaigns</span>
+                  <h3 class="c-card__title">Building a Binding Regional Agreement</h3>
+                  <p class="c-card__excerpt">ERA advances a legal instrument guaranteeing access to information, participation, and justice — holding both states and corporations accountable.</p>
+                  <a href="campaigns.html#binding-agreement" class="c-card__link">Learn More</a>
+                </div>
+              </div>
+              <div class="c-card">
+                <div class="c-card__content">
+                  <span class="c-card__tag">Defenders</span>
+                  <h3 class="c-card__title">Protecting Those Who Protect the Land</h3>
+                  <p class="c-card__excerpt">Environmental defenders are facing arrest, intimidation, and violence. ERA coordinates rapid response and solidarity across the continent.</p>
+                  <a href="campaigns.html#defending-defenders" class="c-card__link">Learn More</a>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Slide 2 -->
+          <div class="c-field-slide">
+            <div class="c-card c-card--featured" style="grid-column: span 2;">
+              <div class="c-card__media">
+                <img src="images/WhatsApp Image 2025-02-23 at 15.55.07 (1).jpeg" alt="ERA Coalition Building" />
+              </div>
+              <div class="c-card__content" style="background:var(--color-terra); padding:2rem;">
+                <span class="c-card__tag" style="color:rgba(255,255,255,0.8);">Extractive Justice</span>
+                <h3 class="c-card__title" style="color:var(--color-white); font-size:1.5rem;">The Global Rush for Critical Minerals — and What It Means for Africa</h3>
+                <p class="c-card__excerpt" style="color:rgba(255,255,255,0.85);">As demand for cobalt, lithium, and rare earths intensifies, African communities ask: will the green transition repeat the patterns of the extractive past?</p>
+                <a href="news.html" class="c-card__link" style="color:rgba(255,255,255,0.9);">Explore Resources →</a>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:1.5rem;">
+              <div class="c-card">
+                <div class="c-card__content">
+                  <span class="c-card__tag">Corporate Accountability</span>
+                  <h3 class="c-card__title">Moving from Voluntary to Binding</h3>
+                  <p class="c-card__excerpt">Voluntary CSR commitments have proven insufficient. ERA's campaign pushes for mandatory human rights and environmental due diligence across supply chains.</p>
+                  <a href="campaigns.html#corporate-accountability" class="c-card__link">Learn More</a>
+                </div>
+              </div>
+              <div class="c-card">
+                <div class="c-card__content">
+                  <span class="c-card__tag">Five Regions</span>
+                  <h3 class="c-card__title">A Continental Network of Anchors</h3>
+                  <p class="c-card__excerpt">West, North, East, Central, and Southern Africa — each sub-region has a designated anchor organization coordinating ERA's campaign on the ground.</p>
+                  <a href="regions.html" class="c-card__link">Explore Regions</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="c-field-slide">
+            <div class="c-card c-card--featured" style="grid-column: span 2;">
+              <div class="c-card__media">
+                <img src="images/activity picture 1.jpeg" alt="ERA Activity" />
+              </div>
+              <div class="c-card__content" style="background:var(--color-forest-mid); padding:2rem;">
+                <span class="c-card__tag" style="color:var(--color-olive);">Defending Defenders</span>
+                <h3 class="c-card__title" style="color:var(--color-white); font-size:1.5rem;">Environmental Defenders Under Threat</h3>
+                <p class="c-card__excerpt" style="color:rgba(255,255,255,0.85);">Across Africa, people protecting land, water, and forests face criminalization, intimidation, and violence. ERA coordinates solidarity and rapid-response support.</p>
+                <a href="campaigns.html#defending-defenders" class="c-card__link" style="color:var(--color-olive);">See the Campaign</a>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:1.5rem;">
+              <div class="c-card">
+                <div class="c-card__content">
+                  <span class="c-card__tag">Access to Justice</span>
+                  <h3 class="c-card__title">When Rights Are Violated, There Must Be Remedy</h3>
+                  <p class="c-card__excerpt">ERA's campaign pushes for enforceable accountability — real legal pathways for communities whose environmental rights have been breached.</p>
+                  <a href="campaigns.html" class="c-card__link">See Campaigns</a>
+                </div>
+              </div>
+              <div class="c-card">
+                <div class="c-card__content">
+                  <span class="c-card__tag">Coalition</span>
+                  <h3 class="c-card__title">55+ Organizations. One Movement.</h3>
+                  <p class="c-card__excerpt">ERA brings together civil society organizations, defenders, and international partners from across all five African sub-regions.</p>
+                  <a href="join.html" class="c-card__link">Join the Movement</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div style="text-align:right; margin-top:var(--space-lg);">
-          <a href="news.html" class="c-button c-button--terra-outline">All News &amp; Publications →</a>
+
+        <!-- Dots -->
+        <div class="c-field-dots" id="fieldDots">
+          <button class="c-field-dot is-active" aria-label="Slide 1"></button>
+          <button class="c-field-dot" aria-label="Slide 2"></button>
+          <button class="c-field-dot" aria-label="Slide 3"></button>
         </div>
+
       </div>
     </section>
 
@@ -374,5 +454,34 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <script>
+    /* From the Field auto-rotating slider */
+    const slides = document.querySelectorAll('.c-field-slide');
+    const dots = document.querySelectorAll('.c-field-dot');
+    let current = 0;
+    let timer;
+
+    function goTo(index) {
+      slides[current].classList.remove('is-active');
+      dots[current].classList.remove('is-active');
+      current = (index + slides.length) % slides.length;
+      slides[current].classList.add('is-active');
+      dots[current].classList.add('is-active');
+    }
+
+    function startTimer() {
+      timer = setInterval(() => goTo(current + 1), 10000);
+    }
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        clearInterval(timer);
+        goTo(i);
+        startTimer();
+      });
+    });
+
+    startTimer();
+  </script>
 </body>
 </html>

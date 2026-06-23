@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(git -C '/Users/danielgayflor/Documents/Claude/ERA Website Project' config --get credential.helper)",
-      "Bash(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Authorization: token __CMDSUB_OUTPUT__' https://api.github.com/repos/danielngayflor/ERA-Website-Project/pages)"
+      "Bash(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Authorization: token __CMDSUB_OUTPUT__' https://api.github.com/repos/danielngayflor/ERA-Website-Project/pages)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
