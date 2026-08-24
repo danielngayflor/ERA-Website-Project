@@ -1,0 +1,16 @@
+{
+  "partners": [
+    {
+      "id": "ford-foundation",
+      "name": "Ford Foundation",
+      "logo": "images/Ford-Foundation-logo-color.png",
+      "url": "https://www.fordfoundation.org"
+    },
+    {
+      "id": "open-society-foundations",
+      "name": "Open Society Foundations",
+      "logo": "images/Open Society Foundations Logo.png",
+      "url": "https://www.opensocietyfoundations.org"
+    }
+  ]
+}

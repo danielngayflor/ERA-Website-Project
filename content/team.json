@@ -1,0 +1,100 @@
+{
+  "secretariat": [
+    {
+      "id": "peter-quaqua",
+      "name": "Peter Quaqua",
+      "role": "Head of Secretariat"
+    },
+    {
+      "id": "clement-voule",
+      "name": "Clement Voule",
+      "role": "Strategic Advisor"
+    },
+    {
+      "id": "radiatu-khanplaye",
+      "name": "Radiatu S. Khanplaye",
+      "role": "Financial Officer"
+    }
+  ],
+  "steering": [
+    {
+      "id": "ahmad-abdallah",
+      "name": "Ahmad Abdallah",
+      "role": "Chairman · Egyptian Commission for Rights and Freedom, Egypt · North Africa Anchor",
+      "highlight": "chairman"
+    },
+    {
+      "id": "saran-toure",
+      "name": "Saran Toure",
+      "role": "Co-Chair · PRONG, Guinea · West Africa Anchor",
+      "highlight": "chair"
+    },
+    {
+      "id": "thuli-makama",
+      "name": "Thuli Makama",
+      "role": "Oil Change International, Eswatini · Southern Africa Anchor"
+    },
+    {
+      "id": "walda-keza-shaka",
+      "name": "Walda Keza Shaka",
+      "role": "Defend Defenders, Uganda · East Africa Anchor"
+    },
+    {
+      "id": "olivier-ndoole",
+      "name": "Olivier Ndoole",
+      "role": "ACEDH, DRC · Central Africa Anchor"
+    },
+    {
+      "id": "emily-kinama",
+      "name": "Emily Kinama",
+      "role": "Katiba Institute, Kenya · Case Studies Working Group"
+    },
+    {
+      "id": "paul-mulindwa",
+      "name": "Paul Mulindwa",
+      "role": "CIVICUS · Outreach & Advocacy Working Group"
+    },
+    {
+      "id": "fiona-iliff",
+      "name": "Fiona Iliff",
+      "role": "American Bar Association, Zimbabwe · Technical Drafting Working Group"
+    },
+    {
+      "id": "jakpor-philip",
+      "name": "Jakpor Philip",
+      "role": "Renevlyn Development Initiative, Nigeria · Communications Working Group"
+    },
+    {
+      "id": "lucien-limacher",
+      "name": "Lucien Limacher",
+      "role": "Natural Justice, South Africa · Defenders Emergency, Solidarity & Response Working Group"
+    },
+    {
+      "id": "wanjira-mathai",
+      "name": "Wanjira Mathai",
+      "role": "Resource Mobilization Working Group"
+    },
+    {
+      "id": "francis-colee",
+      "name": "Francis Colee",
+      "role": "Green Advocates International, Liberia · Fiscal Sponsor"
+    },
+    {
+      "id": "alfred-brownell",
+      "name": "Alfred Lahai Brownell, Sr., Esq.",
+      "role": "Lead Campaigner · USA/Liberia"
+    },
+    {
+      "id": "joseph-burke",
+      "name": "Joseph Burke",
+      "role": "ALLIED · Observer",
+      "highlight": "observer"
+    },
+    {
+      "id": "elizabeth-moses",
+      "name": "Elizabeth Moses",
+      "role": "ALLIED · Observer",
+      "highlight": "observer"
+    }
+  ]
+}

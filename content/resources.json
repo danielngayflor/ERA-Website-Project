@@ -1,0 +1,82 @@
+{
+  "resources": [
+    {
+      "id": "era-periodical-vol1",
+      "category": "newsletter",
+      "tag": "ERA Magazine",
+      "title": "ERA Periodical Vol. 001 — December 2025",
+      "meta": "ERA Secretariat · December 2025",
+      "excerpt": "The inaugural edition of the ERA Periodical — documenting coalition milestones, high-level engagements with the ACHPR, AU, and UNEP, the Freetown Declaration, and the push for a binding African environmental rights agreement.",
+      "image": "images/Image on cover.jpeg",
+      "imageAlt": "ERA Periodical Vol. 001 cover",
+      "linkUrl": "era-magazine-vol1.html",
+      "linkLabel": "Read Online →",
+      "downloadUrl": "downloads/era-magazine-vol1.pdf",
+      "status": "published"
+    },
+    {
+      "id": "dakar-forum",
+      "category": "story",
+      "tag": "Story",
+      "title": "Confronting Africa's Extractive Injustices",
+      "meta": "By Peter Quaqua · 5th Continental Forum, Dakar",
+      "excerpt": "Inside the forum where the question on the table was simple: will Africa finally benefit from its own resources? A report from the frontline of extractive governance.",
+      "image": "images/WhatsApp Image 2025-12-07 at 10.54.06 AM.jpeg",
+      "imageAlt": "5th Continental Forum, Dakar",
+      "linkUrl": "story-dakar.html",
+      "linkLabel": "Read the Story →",
+      "status": "published"
+    },
+    {
+      "id": "achpr-article-21",
+      "category": "external",
+      "tag": "External Resource",
+      "title": "African Charter on Human and Peoples' Rights — Article 21",
+      "meta": "African Commission on Human and Peoples' Rights",
+      "excerpt": "The foundational legal text recognizing that peoples have the right to freely dispose of their wealth and natural resources — the basis for ERA's advocacy.",
+      "linkUrl": "https://www.achpr.org/legalinstruments/detail?id=49",
+      "linkLabel": "Visit Source →",
+      "externalBadge": true,
+      "status": "published"
+    },
+    {
+      "id": "binding-framework-opinion",
+      "category": "opinion",
+      "tag": "Opinion Piece",
+      "title": "Why Africa Needs a Binding Environmental Rights Framework Now",
+      "meta": "ERA Secretariat",
+      "excerpt": "Voluntary commitments and corporate social responsibility have proven insufficient. The time for binding legal obligations is not coming — it is here.",
+      "status": "draft"
+    },
+    {
+      "id": "era-bulletin-issue1",
+      "category": "newsletter",
+      "tag": "ERA Magazine",
+      "title": "ERA Bulletin — Issue 1",
+      "meta": "Environmental Rights Africa",
+      "excerpt": "Our inaugural newsletter covering coalition milestones, field updates from all five sub-regions, and the latest on the campaign for a binding regional agreement.",
+      "status": "draft"
+    },
+    {
+      "id": "liberia-toxic-waste",
+      "category": "casestudy",
+      "tag": "Case Study",
+      "title": "Toxic Waste Discharge in Liberia: A Pattern of Impunity",
+      "meta": "ERA Case Studies Working Group",
+      "excerpt": "How millions of gallons of toxic waste discharged into Liberian waterways exposed communities to harm — and how residents who protested were met with arrests rather than accountability.",
+      "status": "draft"
+    },
+    {
+      "id": "global-witness-defending-tomorrow",
+      "category": "external",
+      "tag": "External Resource",
+      "title": "Global Witness: Defending Tomorrow",
+      "meta": "Global Witness · Annual Report on Defender Killings",
+      "excerpt": "The annual report documenting attacks on land and environmental defenders worldwide — with Africa consistently among the most dangerous regions for frontline activists.",
+      "linkUrl": "https://www.globalwitness.org/en/campaigns/environmental-activists/",
+      "linkLabel": "Visit Source →",
+      "externalBadge": true,
+      "status": "published"
+    }
+  ]
+}
