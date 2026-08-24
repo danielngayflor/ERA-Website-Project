@@ -2,7 +2,7 @@
 // Redirects the browser to GitHub's OAuth authorization page.
 // Decap CMS calls /api/auth?provider=github when login is initiated.
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   const { GITHUB_CLIENT_ID } = process.env;
 
   if (!GITHUB_CLIENT_ID) {
