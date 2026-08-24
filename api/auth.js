@@ -12,7 +12,7 @@ module.exports = function handler(req, res) {
   const params = new URLSearchParams({
     client_id: GITHUB_CLIENT_ID,
     scope: 'repo,user',
-    redirect_uri: `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/callback`,
+    redirect_uri: 'https://eraafrica.org/api/callback',
   });
 
   res.redirect(302, `https://github.com/login/oauth/authorize?${params}`);
