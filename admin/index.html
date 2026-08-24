@@ -1,14 +1,712 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ERA Content Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest: #1a3a0e;
+      --olive: #e0e69f;
+      --terra: #b84d24;
+      --bg: #f5f5f0;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #666;
+      --border: #ddd;
+      --radius: 8px;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Login screen ── */
+    #loginScreen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 2rem;
+    }
+    .login-card {
+      background: var(--card); border-radius: var(--radius); padding: 2.5rem;
+      max-width: 480px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+    .login-card h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--forest); margin-bottom: .3rem; }
+    .login-card p { color: var(--muted); font-size: .9rem; margin-bottom: 1.8rem; line-height: 1.6; }
+    .login-card label { display: block; font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--forest); margin-bottom: .4rem; }
+    .login-card input { width: 100%; padding: .7rem .9rem; border: 1.5px solid var(--border); border-radius: 6px; font-size: .95rem; outline: none; }
+    .login-card input:focus { border-color: var(--forest); }
+    .login-hint { font-size: .78rem; color: var(--muted); margin-top: .5rem; line-height: 1.5; }
+    .login-hint a { color: var(--terra); }
+    #loginError { color: var(--terra); font-size: .85rem; margin-top: .8rem; display: none; }
+
+    /* ── App shell ── */
+    #app { display: none; }
+    .topbar {
+      background: var(--forest); color: #fff; padding: .9rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .topbar__brand { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--olive); }
+    .topbar__user { font-size: .8rem; color: rgba(255,255,255,.7); display: flex; align-items: center; gap: 1rem; }
+    .topbar__user button { background: none; border: 1px solid rgba(255,255,255,.3); color: #fff; padding: .3rem .7rem; border-radius: 4px; cursor: pointer; font-size: .78rem; }
+
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 52px); }
+
+    .sidebar { background: var(--forest); padding: 1.5rem 0; }
+    .sidebar nav a {
+      display: block; padding: .7rem 1.5rem; color: rgba(255,255,255,.75);
+      text-decoration: none; font-size: .88rem; transition: .15s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar nav a:hover { color: #fff; background: rgba(255,255,255,.06); }
+    .sidebar nav a.active { color: var(--olive); border-left-color: var(--olive); background: rgba(255,255,255,.05); font-weight: 600; }
+    .sidebar nav .nav-section { padding: .9rem 1.5rem .3rem; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.35); }
+
+    .main { padding: 2rem; overflow-y: auto; }
+
+    /* ── Panels ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .panel-header { margin-bottom: 1.5rem; }
+    .panel-header h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--forest); }
+    .panel-header p { color: var(--muted); font-size: .88rem; margin-top: .3rem; }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .55rem 1.1rem; border-radius: 6px; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; transition: .15s; }
+    .btn-primary { background: var(--forest); color: #fff; }
+    .btn-primary:hover { background: #0f2408; }
+    .btn-terra { background: var(--terra); color: #fff; }
+    .btn-terra:hover { background: #9a3d1a; }
+    .btn-outline { background: none; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--forest); color: var(--forest); }
+    .btn-danger { background: none; border: 1.5px solid #e55; color: #c33; }
+    .btn-danger:hover { background: #fee; }
+    .btn-sm { padding: .35rem .75rem; font-size: .8rem; }
+
+    /* ── Card list ── */
+    .item-list { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 1.5rem; }
+    .item-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem;
+      transition: border-color .15s;
+    }
+    .item-card:hover { border-color: var(--forest); }
+    .item-card__info { flex: 1; min-width: 0; }
+    .item-card__title { font-weight: 600; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-card__meta { font-size: .8rem; color: var(--muted); margin-top: .15rem; }
+    .item-card__actions { display: flex; gap: .5rem; flex-shrink: 0; }
+    .badge { display: inline-block; padding: .15rem .5rem; border-radius: 3px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .badge-published { background: #d4edda; color: #155724; }
+    .badge-draft { background: #fff3cd; color: #856404; }
+
+    /* ── Form ── */
+    .form-card { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .form-row { margin-bottom: 1.2rem; }
+    .form-row label { display: block; font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--forest); margin-bottom: .4rem; }
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%; padding: .6rem .85rem; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: .92rem; font-family: inherit; outline: none;
+      background: #fff; resize: vertical;
+    }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--forest); }
+    .form-row .hint { font-size: .77rem; color: var(--muted); margin-top: .3rem; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-actions { display: flex; gap: .75rem; margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid var(--border); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--forest); color: #fff;
+      padding: .8rem 1.2rem; border-radius: 6px; font-size: .88rem;
+      transform: translateY(80px); opacity: 0; transition: .3s; z-index: 999;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.error { background: var(--terra); }
+
+    /* ── Loading ── */
+    .loading { text-align: center; padding: 3rem; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <!-- Decap CMS loaded with manual init so we can inject dynamic config -->
-  <script>window.CMS_MANUAL_INIT = true;</script>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <script src="config.js"></script>
+
+<!-- ════════════════════════════════════════════════════════
+     LOGIN SCREEN
+════════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>ERA Content Manager</h1>
+    <p>Enter your GitHub Personal Access Token to manage website content. Your token is stored only in this browser.</p>
+    <label for="tokenInput">GitHub Personal Access Token</label>
+    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+    <p class="login-hint">
+      Don't have a token? <a href="https://github.com/settings/tokens/new?scopes=repo&description=ERA+CMS" target="_blank" rel="noopener">Create one on GitHub</a> — select the <strong>repo</strong> scope and click "Generate token".
+    </p>
+    <div id="loginError">Invalid token or no access to the repository.</div>
+    <br />
+    <button class="btn btn-primary" id="loginBtn" style="width:100%; justify-content:center;">Sign In →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════════════════════ -->
+<div id="app">
+  <div class="topbar">
+    <span class="topbar__brand">ERA Content Manager</span>
+    <div class="topbar__user">
+      <span id="userLabel"></span>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+  <div class="layout">
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-section">Content</div>
+        <a href="#" data-panel="resources" class="nav-link active">📰 Resources</a>
+        <a href="#" data-panel="team" class="nav-link">👥 Team Members</a>
+        <a href="#" data-panel="partners" class="nav-link">🤝 Partners & Donors</a>
+      </nav>
+    </aside>
+    <main class="main" id="mainContent">
+      <!-- Panels injected here -->
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+const REPO = 'danielngayflor/ERA-Website-Project';
+const BRANCH = 'main';
+const FILES = {
+  resources: 'content/resources.json',
+  team:      'content/team.json',
+  partners:  'content/partners.json',
+};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let token = '';
+let currentPanel = 'resources';
+let contentData = {};   // { resources: {...}, team: {...}, partners: {...} }
+let fileSHAs = {};      // { resources: 'sha...', team: 'sha...', partners: 'sha...' }
+
+// ═══════════════════════════════════════════════════════════
+// GITHUB API
+// ═══════════════════════════════════════════════════════════
+async function ghFetch(path, opts = {}) {
+  const res = await fetch(`https://api.github.com${path}`, {
+    ...opts,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(opts.headers || {}),
+    },
+  });
+  if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function getFile(key) {
+  const data = await ghFetch(`/repos/${REPO}/contents/${FILES[key]}?ref=${BRANCH}`);
+  fileSHAs[key] = data.sha;
+  const json = JSON.parse(atob(data.content.replace(/\n/g, '')));
+  contentData[key] = json;
+  return json;
+}
+
+async function saveFile(key, json, message) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(json, null, 2))));
+  await ghFetch(`/repos/${REPO}/contents/${FILES[key]}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, content, sha: fileSHAs[key], branch: BRANCH }),
+  });
+  // Refresh SHA
+  await getFile(key);
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+document.getElementById('logoutBtn').addEventListener('click', logout);
+
+async function login() {
+  const input = document.getElementById('tokenInput').value.trim();
+  if (!input) return;
+  document.getElementById('loginBtn').textContent = 'Checking…';
+  try {
+    token = input;
+    const user = await ghFetch('/user');
+    localStorage.setItem('era_cms_token', token);
+    document.getElementById('userLabel').textContent = user.login;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadPanel('resources');
+  } catch(e) {
+    token = '';
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginBtn').textContent = 'Sign In →';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('era_cms_token');
+  token = '';
+  contentData = {};
+  fileSHAs = {};
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('tokenInput').value = '';
+}
+
+// Auto-login if token saved
+const saved = localStorage.getItem('era_cms_token');
+if (saved) { document.getElementById('tokenInput').value = saved; login(); }
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.nav-link').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    a.classList.add('active');
+    loadPanel(a.dataset.panel);
+  });
+});
+
+function loadPanel(name) {
+  currentPanel = name;
+  const main = document.getElementById('mainContent');
+  main.innerHTML = '<div class="loading">Loading…</div>';
+  if (name === 'resources') renderResourcesPanel();
+  else if (name === 'team') renderTeamPanel();
+  else if (name === 'partners') renderPartnersPanel();
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function toast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (isError ? ' error' : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ═══════════════════════════════════════════════════════════
+// RESOURCES PANEL
+// ═══════════════════════════════════════════════════════════
+async function renderResourcesPanel() {
+  const main = document.getElementById('mainContent');
+  const data = contentData.resources || await getFile('resources');
+  const resources = data.resources || [];
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>Resources</h2>
+      <p>Articles, ERA magazines, case studies, opinion pieces, and external links on the Resource Hub page.</p>
+    </div>
+    <button class="btn btn-primary" id="addResourceBtn">+ Add Resource</button>
+    <br/><br/>
+    <div class="item-list" id="resourceList">
+      ${resources.map((r, i) => `
+        <div class="item-card">
+          <div class="item-card__info">
+            <div class="item-card__title">${esc(r.title)}</div>
+            <div class="item-card__meta">${esc(r.category)} · ${esc(r.meta||'')}</div>
+          </div>
+          <span class="badge badge-${r.status === 'published' ? 'published' : 'draft'}">${r.status||'draft'}</span>
+          <div class="item-card__actions">
+            <button class="btn btn-outline btn-sm" onclick="editResource(${i})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteResource(${i})">Delete</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  document.getElementById('addResourceBtn').addEventListener('click', () => editResource(-1));
+}
+
+function editResource(index) {
+  const resources = contentData.resources.resources || [];
+  const r = index >= 0 ? resources[index] : {};
+  const isNew = index < 0;
+  const main = document.getElementById('mainContent');
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>${isNew ? 'Add Resource' : 'Edit Resource'}</h2>
+    </div>
+    <div class="form-card">
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Title *</label>
+          <input id="f_title" value="${esc(r.title||'')}" placeholder="Resource headline" />
+        </div>
+        <div class="form-row">
+          <label>Category *</label>
+          <select id="f_category">
+            ${['story','casestudy','newsletter','opinion','external'].map(c =>
+              `<option value="${c}" ${r.category===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Tag label</label>
+          <input id="f_tag" value="${esc(r.tag||'')}" placeholder="e.g. Story, ERA Magazine" />
+        </div>
+        <div class="form-row">
+          <label>Meta (author / date)</label>
+          <input id="f_meta" value="${esc(r.meta||'')}" placeholder="By Name · Month Year" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Excerpt *</label>
+        <textarea id="f_excerpt" rows="3" placeholder="1–2 sentence summary shown on card">${esc(r.excerpt||'')}</textarea>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Link URL</label>
+          <input id="f_linkUrl" value="${esc(r.linkUrl||'')}" placeholder="story-page.html or https://..." />
+          <p class="hint">Internal page filename or full external URL</p>
+        </div>
+        <div class="form-row">
+          <label>Link label</label>
+          <input id="f_linkLabel" value="${esc(r.linkLabel||'Read More →')}" />
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Card image path</label>
+          <input id="f_image" value="${esc(r.image||'')}" placeholder="images/photo.jpg" />
+          <p class="hint">Path to image in the images/ folder</p>
+        </div>
+        <div class="form-row">
+          <label>Image alt text</label>
+          <input id="f_imageAlt" value="${esc(r.imageAlt||'')}" />
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Download URL (PDF)</label>
+          <input id="f_downloadUrl" value="${esc(r.downloadUrl||'')}" placeholder="downloads/report.pdf" />
+        </div>
+        <div class="form-row">
+          <label>Status *</label>
+          <select id="f_status">
+            <option value="published" ${r.status==='published'?'selected':''}>Published</option>
+            <option value="draft" ${r.status!=='published'?'selected':''}>Draft (hidden)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Show "External ↗" badge?</label>
+        <select id="f_externalBadge">
+          <option value="false" ${!r.externalBadge?'selected':''}>No</option>
+          <option value="true" ${r.externalBadge?'selected':''}>Yes</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="saveResourceBtn">💾 Save & Publish</button>
+        <button class="btn btn-outline" onclick="renderResourcesPanel()">Cancel</button>
+      </div>
+    </div>`;
+
+  document.getElementById('saveResourceBtn').addEventListener('click', () => saveResource(index));
+}
+
+async function saveResource(index) {
+  const resources = contentData.resources.resources;
+  const title = document.getElementById('f_title').value.trim();
+  if (!title) { toast('Title is required', true); return; }
+
+  const item = {
+    id: index >= 0 ? resources[index].id : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g,''),
+    category: document.getElementById('f_category').value,
+    tag: document.getElementById('f_tag').value.trim(),
+    title,
+    meta: document.getElementById('f_meta').value.trim(),
+    excerpt: document.getElementById('f_excerpt').value.trim(),
+    image: document.getElementById('f_image').value.trim() || undefined,
+    imageAlt: document.getElementById('f_imageAlt').value.trim() || undefined,
+    linkUrl: document.getElementById('f_linkUrl').value.trim() || undefined,
+    linkLabel: document.getElementById('f_linkLabel').value.trim() || undefined,
+    downloadUrl: document.getElementById('f_downloadUrl').value.trim() || undefined,
+    externalBadge: document.getElementById('f_externalBadge').value === 'true' || undefined,
+    status: document.getElementById('f_status').value,
+  };
+  // Remove undefined keys
+  Object.keys(item).forEach(k => item[k] === undefined && delete item[k]);
+
+  if (index >= 0) resources[index] = item;
+  else resources.unshift(item);
+
+  const btn = document.getElementById('saveResourceBtn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    await saveFile('resources', contentData.resources, `CMS: ${index >= 0 ? 'update' : 'add'} resource "${title}"`);
+    toast('✓ Saved! Site will update in ~1 minute.');
+    renderResourcesPanel();
+  } catch(e) {
+    toast('Save failed: ' + e.message, true);
+    btn.textContent = '💾 Save & Publish'; btn.disabled = false;
+  }
+}
+
+async function deleteResource(index) {
+  const r = contentData.resources.resources[index];
+  if (!confirm(`Delete "${r.title}"? This cannot be undone.`)) return;
+  contentData.resources.resources.splice(index, 1);
+  try {
+    await saveFile('resources', contentData.resources, `CMS: delete resource "${r.title}"`);
+    toast('✓ Deleted.');
+    renderResourcesPanel();
+  } catch(e) { toast('Delete failed: ' + e.message, true); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TEAM PANEL
+// ═══════════════════════════════════════════════════════════
+async function renderTeamPanel() {
+  const main = document.getElementById('mainContent');
+  const data = contentData.team || await getFile('team');
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>Team Members</h2>
+      <p>Secretariat staff and Steering Committee shown on the About page.</p>
+    </div>
+
+    <h3 style="font-size:.85rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--terra); margin-bottom:.75rem;">Secretariat Staff</h3>
+    <button class="btn btn-outline btn-sm" id="addSecretariatBtn" style="margin-bottom:.75rem;">+ Add Staff Member</button>
+    <div class="item-list">
+      ${(data.secretariat||[]).map((m,i) => `
+        <div class="item-card">
+          <div class="item-card__info">
+            <div class="item-card__title">${esc(m.name)}</div>
+            <div class="item-card__meta">${esc(m.role)}</div>
+          </div>
+          <div class="item-card__actions">
+            <button class="btn btn-outline btn-sm" onclick="editTeamMember('secretariat',${i})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTeamMember('secretariat',${i})">Delete</button>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <h3 style="font-size:.85rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--terra); margin:1.5rem 0 .75rem;">Steering Committee</h3>
+    <button class="btn btn-outline btn-sm" id="addSteeringBtn" style="margin-bottom:.75rem;">+ Add Committee Member</button>
+    <div class="item-list">
+      ${(data.steering||[]).map((m,i) => `
+        <div class="item-card">
+          <div class="item-card__info">
+            <div class="item-card__title">${esc(m.name)}</div>
+            <div class="item-card__meta">${esc(m.role)}</div>
+          </div>
+          <div class="item-card__actions">
+            <button class="btn btn-outline btn-sm" onclick="editTeamMember('steering',${i})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTeamMember('steering',${i})">Delete</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  document.getElementById('addSecretariatBtn').addEventListener('click', () => editTeamMember('secretariat', -1));
+  document.getElementById('addSteeringBtn').addEventListener('click', () => editTeamMember('steering', -1));
+}
+
+function editTeamMember(group, index) {
+  const list = contentData.team[group] || [];
+  const m = index >= 0 ? list[index] : {};
+  const isNew = index < 0;
+  const main = document.getElementById('mainContent');
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>${isNew ? 'Add' : 'Edit'} ${group === 'secretariat' ? 'Staff Member' : 'Committee Member'}</h2>
+    </div>
+    <div class="form-card">
+      <div class="form-row">
+        <label>Full Name *</label>
+        <input id="f_name" value="${esc(m.name||'')}" placeholder="Full name" />
+      </div>
+      <div class="form-row">
+        <label>Role / Title</label>
+        <input id="f_role" value="${esc(m.role||'')}" placeholder="Role · Organisation · Region" />
+      </div>
+      ${group === 'steering' ? `
+      <div class="form-row">
+        <label>Highlight</label>
+        <select id="f_highlight">
+          <option value="" ${!m.highlight?'selected':''}>None</option>
+          <option value="chairman" ${m.highlight==='chairman'?'selected':''}>Terracotta — Chairman</option>
+          <option value="chair" ${m.highlight==='chair'?'selected':''}>Terracotta — Co-Chair</option>
+          <option value="observer" ${m.highlight==='observer'?'selected':''}>Grey — Observer</option>
+        </select>
+      </div>` : ''}
+      <div class="form-actions">
+        <button class="btn btn-primary" id="saveTeamBtn">💾 Save</button>
+        <button class="btn btn-outline" onclick="renderTeamPanel()">Cancel</button>
+      </div>
+    </div>`;
+
+  document.getElementById('saveTeamBtn').addEventListener('click', () => saveTeamMember(group, index));
+}
+
+async function saveTeamMember(group, index) {
+  const list = contentData.team[group];
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { toast('Name is required', true); return; }
+
+  const item = {
+    id: index >= 0 ? list[index].id : name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''),
+    name,
+    role: document.getElementById('f_role').value.trim(),
+  };
+  const hl = document.getElementById('f_highlight');
+  if (hl && hl.value) item.highlight = hl.value;
+
+  if (index >= 0) list[index] = item;
+  else list.push(item);
+
+  const btn = document.getElementById('saveTeamBtn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    await saveFile('team', contentData.team, `CMS: ${index>=0?'update':'add'} team member "${name}"`);
+    toast('✓ Saved!');
+    renderTeamPanel();
+  } catch(e) { toast('Save failed: ' + e.message, true); btn.textContent='💾 Save'; btn.disabled=false; }
+}
+
+async function deleteTeamMember(group, index) {
+  const m = contentData.team[group][index];
+  if (!confirm(`Remove ${m.name}?`)) return;
+  contentData.team[group].splice(index, 1);
+  try {
+    await saveFile('team', contentData.team, `CMS: remove team member "${m.name}"`);
+    toast('✓ Removed.');
+    renderTeamPanel();
+  } catch(e) { toast('Failed: ' + e.message, true); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PARTNERS PANEL
+// ═══════════════════════════════════════════════════════════
+async function renderPartnersPanel() {
+  const main = document.getElementById('mainContent');
+  const data = contentData.partners || await getFile('partners');
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>Partners & Donors</h2>
+      <p>Donor logos shown at the bottom of the homepage.</p>
+    </div>
+    <button class="btn btn-primary" id="addPartnerBtn">+ Add Partner</button>
+    <br/><br/>
+    <div class="item-list">
+      ${(data.partners||[]).map((p,i) => `
+        <div class="item-card">
+          <div class="item-card__info">
+            <div class="item-card__title">${esc(p.name)}</div>
+            <div class="item-card__meta">${esc(p.logo)}</div>
+          </div>
+          <div class="item-card__actions">
+            <button class="btn btn-outline btn-sm" onclick="editPartner(${i})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePartner(${i})">Delete</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  document.getElementById('addPartnerBtn').addEventListener('click', () => editPartner(-1));
+}
+
+function editPartner(index) {
+  const list = contentData.partners.partners || [];
+  const p = index >= 0 ? list[index] : {};
+  const isNew = index < 0;
+  const main = document.getElementById('mainContent');
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>${isNew ? 'Add' : 'Edit'} Partner</h2>
+    </div>
+    <div class="form-card">
+      <div class="form-row">
+        <label>Organisation Name *</label>
+        <input id="f_name" value="${esc(p.name||'')}" placeholder="e.g. Ford Foundation" />
+      </div>
+      <div class="form-row">
+        <label>Logo image path</label>
+        <input id="f_logo" value="${esc(p.logo||'')}" placeholder="images/logo.png" />
+        <p class="hint">Path to logo in the images/ folder. Upload the file to GitHub first.</p>
+      </div>
+      <div class="form-row">
+        <label>Website URL</label>
+        <input id="f_url" value="${esc(p.url||'')}" placeholder="https://..." />
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="savePartnerBtn">💾 Save</button>
+        <button class="btn btn-outline" onclick="renderPartnersPanel()">Cancel</button>
+      </div>
+    </div>`;
+
+  document.getElementById('savePartnerBtn').addEventListener('click', () => savePartner(index));
+}
+
+async function savePartner(index) {
+  const list = contentData.partners.partners;
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { toast('Name is required', true); return; }
+
+  const item = {
+    id: index >= 0 ? list[index].id : name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''),
+    name,
+    logo: document.getElementById('f_logo').value.trim(),
+    url: document.getElementById('f_url').value.trim() || undefined,
+  };
+  Object.keys(item).forEach(k => item[k] === undefined && delete item[k]);
+
+  if (index >= 0) list[index] = item;
+  else list.push(item);
+
+  const btn = document.getElementById('savePartnerBtn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    await saveFile('partners', contentData.partners, `CMS: ${index>=0?'update':'add'} partner "${name}"`);
+    toast('✓ Saved!');
+    renderPartnersPanel();
+  } catch(e) { toast('Save failed: ' + e.message, true); btn.textContent='💾 Save'; btn.disabled=false; }
+}
+
+async function deletePartner(index) {
+  const p = contentData.partners.partners[index];
+  if (!confirm(`Remove ${p.name}?`)) return;
+  contentData.partners.partners.splice(index, 1);
+  try {
+    await saveFile('partners', contentData.partners, `CMS: remove partner "${p.name}"`);
+    toast('✓ Removed.');
+    renderPartnersPanel();
+  } catch(e) { toast('Failed: ' + e.message, true); }
+}
+</script>
 </body>
 </html>
