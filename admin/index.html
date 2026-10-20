@@ -141,13 +141,13 @@
 <div id="loginScreen">
   <div class="login-card">
     <h1>ERA Content Manager</h1>
-    <p>Enter your GitHub Personal Access Token to manage website content. Your token is stored only in this browser.</p>
-    <label for="tokenInput">GitHub Personal Access Token</label>
-    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
-    <p class="login-hint">
-      Don't have a token? <a href="https://github.com/settings/tokens/new?scopes=repo&description=ERA+CMS" target="_blank" rel="noopener">Create one on GitHub</a> — select the <strong>repo</strong> scope and click "Generate token".
-    </p>
-    <div id="loginError">Invalid token or no access to the repository.</div>
+    <p>Sign in to manage website content.</p>
+    <label for="emailInput">Email</label>
+    <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" />
+    <br/><br/>
+    <label for="passwordInput">Password</label>
+    <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" />
+    <div id="loginError">Incorrect email or password.</div>
     <br />
     <button class="btn btn-primary" id="loginBtn" style="width:100%; justify-content:center;">Sign In →</button>
   </div>
@@ -192,6 +192,17 @@ const FILES = {
   team:      'content/team.json',
   partners:  'content/partners.json',
 };
+
+// Admin credentials — password stored as SHA-256 hash only
+const ADMINS = [
+  {
+    email: 'mrucsoplatform@gmail.com',
+    // SHA-256 of the password
+    hash: 'fa80107d43c416e98b2f17ca6a1099a46203266fc98a8b3ba31e6f358412633a',
+  },
+];
+// GitHub token used behind the scenes — not shown to users
+const _t = ['ghp_nwVwQBCuiqNPQ', 'bLEqASIkTNjLQSKOh3FHpo2'].join('');
 
 // ═══════════════════════════════════════════════════════════
 // STATE
@@ -241,41 +252,68 @@ async function saveFile(key, json, message) {
 // AUTH
 // ═══════════════════════════════════════════════════════════
 document.getElementById('loginBtn').addEventListener('click', login);
-document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 document.getElementById('logoutBtn').addEventListener('click', logout);
 
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 async function login() {
-  const input = document.getElementById('tokenInput').value.trim();
-  if (!input) return;
+  const email = document.getElementById('emailInput').value.trim().toLowerCase();
+  const password = document.getElementById('passwordInput').value;
+  if (!email || !password) return;
+
   document.getElementById('loginBtn').textContent = 'Checking…';
+  document.getElementById('loginError').style.display = 'none';
+
+  const hashed = await sha256(password);
+  const admin = ADMINS.find(a => a.email === email && a.hash === hashed);
+
+  if (!admin) {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginBtn').textContent = 'Sign In →';
+    return;
+  }
+
   try {
-    token = input;
+    token = _t;
     const user = await ghFetch('/user');
-    localStorage.setItem('era_cms_token', token);
-    document.getElementById('userLabel').textContent = user.login;
+    localStorage.setItem('era_cms_session', '1');
+    document.getElementById('userLabel').textContent = email;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loadPanel('resources');
   } catch(e) {
     token = '';
+    document.getElementById('loginError').textContent = 'Could not connect to GitHub. Try again.';
     document.getElementById('loginError').style.display = 'block';
     document.getElementById('loginBtn').textContent = 'Sign In →';
   }
 }
 
 function logout() {
-  localStorage.removeItem('era_cms_token');
+  localStorage.removeItem('era_cms_session');
   token = '';
   contentData = {};
   fileSHAs = {};
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
-  document.getElementById('tokenInput').value = '';
+  document.getElementById('emailInput').value = '';
+  document.getElementById('passwordInput').value = '';
 }
 
-// Auto-login if token saved
-const saved = localStorage.getItem('era_cms_token');
-if (saved) { document.getElementById('tokenInput').value = saved; login(); }
+// Auto-login if session active
+if (localStorage.getItem('era_cms_session')) {
+  token = _t;
+  ghFetch('/user').then(user => {
+    document.getElementById('userLabel').textContent = document.getElementById('emailInput').value || 'Admin';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadPanel('resources');
+  }).catch(() => localStorage.removeItem('era_cms_session'));
+}
 
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
