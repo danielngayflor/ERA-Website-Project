@@ -359,9 +359,15 @@ function loadPanel(name) {
   currentPanel = name;
   const main = document.getElementById('mainContent');
   main.innerHTML = '<div class="loading">Loading…</div>';
-  if (name === 'resources') renderResourcesPanel();
-  else if (name === 'team') renderTeamPanel();
-  else if (name === 'partners') renderPartnersPanel();
+  let p;
+  if (name === 'resources') p = renderResourcesPanel();
+  else if (name === 'team') p = renderTeamPanel();
+  else if (name === 'partners') p = renderPartnersPanel();
+  if (p && p.catch) p.catch(err => {
+    main.innerHTML = `<div style="color:var(--terra);padding:1.5rem;background:var(--card);border-radius:var(--radius);border:1.5px solid var(--terra);">
+      <strong>Error loading panel:</strong><br>${err.message || err}
+    </div>`;
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
