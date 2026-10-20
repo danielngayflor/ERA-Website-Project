@@ -123,6 +123,30 @@
     #toast.show { transform: translateY(0); opacity: 1; }
     #toast.error { background: var(--terra); }
 
+    /* ── Toggle switch ── */
+    .toggle-row { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.2rem; }
+    .toggle-row .toggle-label { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--forest); }
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 24px; cursor: pointer; transition: .2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+    .toggle input:checked + .toggle-slider { background: var(--forest); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* ── Image upload area ── */
+    .img-upload-area {
+      border: 2px dashed var(--border); border-radius: var(--radius); padding: 1.2rem;
+      text-align: center; cursor: pointer; transition: .15s; background: #fafafa;
+      position: relative;
+    }
+    .img-upload-area:hover { border-color: var(--forest); background: #f0f4ee; }
+    .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .img-upload-area .upload-icon { font-size: 1.8rem; margin-bottom: .3rem; }
+    .img-upload-area .upload-text { font-size: .85rem; color: var(--muted); }
+    .img-preview { margin-top: .75rem; position: relative; display: inline-block; }
+    .img-preview img { max-height: 140px; max-width: 100%; border-radius: 6px; border: 1px solid var(--border); display: block; }
+    .img-preview .remove-img { position: absolute; top: -8px; right: -8px; background: var(--terra); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: .8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+
     /* ── Loading ── */
     .loading { text-align: center; padding: 3rem; color: var(--muted); }
 
@@ -357,6 +381,85 @@ function toast(msg, isError = false) {
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ═══════════════════════════════════════════════════════════
+// IMAGE UPLOAD HELPER
+// ═══════════════════════════════════════════════════════════
+
+// Renders an image upload widget into containerId.
+// existingPath: current value from JSON (e.g. "images/photo.jpg") or ''
+// Returns object with getPath() to read current value before save.
+function renderImageWidget(containerId, existingPath) {
+  const el = document.getElementById(containerId);
+  let currentPath = existingPath || '';
+  let pendingFile = null; // { name, base64 }
+
+  function render() {
+    el.innerHTML = `
+      <div class="img-upload-area" id="${containerId}_drop">
+        <input type="file" id="${containerId}_file" accept="image/*" />
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">Click to choose an image — JPG, PNG, WebP</div>
+      </div>
+      ${currentPath || pendingFile ? `
+        <div class="img-preview" id="${containerId}_preview">
+          <img src="${pendingFile ? pendingFile.dataUrl : currentPath}" alt="preview" />
+          <button class="remove-img" id="${containerId}_remove" title="Remove image">×</button>
+        </div>` : ''}
+      ${currentPath && !pendingFile ? `<p style="font-size:.78rem;color:var(--muted);margin-top:.4rem;">Current: ${currentPath}</p>` : ''}
+      ${pendingFile ? `<p style="font-size:.78rem;color:#155724;margin-top:.4rem;">✓ New image ready to upload: ${pendingFile.name}</p>` : ''}`;
+
+    document.getElementById(`${containerId}_file`).addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        pendingFile = { name: file.name, dataUrl: ev.target.result, file };
+        currentPath = '';
+        render();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    const removeBtn = document.getElementById(`${containerId}_remove`);
+    if (removeBtn) removeBtn.addEventListener('click', () => {
+      currentPath = ''; pendingFile = null; render();
+    });
+  }
+
+  render();
+
+  return {
+    async getPath() {
+      if (!pendingFile) return currentPath;
+      // Upload file to GitHub images/ folder
+      const arrayBuf = await pendingFile.file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuf);
+      const b64 = btoa(String.fromCharCode(...bytes));
+      const filename = pendingFile.name.replace(/[^a-zA-Z0-9._-]/g, '-');
+      const path = `images/${filename}`;
+      // Check if file exists to get its SHA (avoids 422 on duplicate name)
+      let sha;
+      try {
+        const existing = await ghFetch(`/repos/${REPO}/contents/${path}`);
+        sha = existing.sha;
+      } catch(e) { /* new file */ }
+      await ghFetch(`/repos/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `CMS: upload image ${filename}`,
+          content: b64,
+          branch: BRANCH,
+          ...(sha ? { sha } : {}),
+        }),
+      });
+      currentPath = path;
+      pendingFile = null;
+      return path;
+    }
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
 // RESOURCES PANEL
 // ═══════════════════════════════════════════════════════════
 async function renderResourcesPanel() {
@@ -438,15 +541,22 @@ function editResource(index) {
           <input id="f_linkLabel" value="${esc(r.linkLabel||'Read More →')}" />
         </div>
       </div>
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Card image path</label>
-          <input id="f_image" value="${esc(r.image||'')}" placeholder="images/photo.jpg" />
-          <p class="hint">Path to image in the images/ folder</p>
-        </div>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="f_hasImage" ${r.image ? 'checked' : ''} />
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Card Image</span>
+        <span style="font-size:.8rem;color:var(--muted);">Turn on to add a photo to this resource card</span>
+      </div>
+      <div id="imageSection" style="display:${r.image ? 'block' : 'none'}">
         <div class="form-row">
           <label>Image alt text</label>
-          <input id="f_imageAlt" value="${esc(r.imageAlt||'')}" />
+          <input id="f_imageAlt" value="${esc(r.imageAlt||'')}" placeholder="Describe the image for screen readers" />
+        </div>
+        <div class="form-row">
+          <label>Image</label>
+          <div id="resourceImageWidget"></div>
         </div>
       </div>
       <div class="form-grid-2">
@@ -475,13 +585,33 @@ function editResource(index) {
       </div>
     </div>`;
 
-  document.getElementById('saveResourceBtn').addEventListener('click', () => saveResource(index));
+  // Wire up image toggle
+  let resourceImgWidget = renderImageWidget('resourceImageWidget', r.image || '');
+  document.getElementById('f_hasImage').addEventListener('change', e => {
+    const section = document.getElementById('imageSection');
+    section.style.display = e.target.checked ? 'block' : 'none';
+    if (e.target.checked && !resourceImgWidget) {
+      resourceImgWidget = renderImageWidget('resourceImageWidget', '');
+    }
+  });
+
+  document.getElementById('saveResourceBtn').addEventListener('click', () => saveResource(index, resourceImgWidget));
 }
 
-async function saveResource(index) {
+async function saveResource(index, imgWidget) {
   const resources = contentData.resources.resources;
   const title = document.getElementById('f_title').value.trim();
   if (!title) { toast('Title is required', true); return; }
+
+  const btn = document.getElementById('saveResourceBtn');
+  btn.textContent = 'Uploading…'; btn.disabled = true;
+
+  const hasImage = document.getElementById('f_hasImage').checked;
+  let imagePath = undefined;
+  if (hasImage && imgWidget) {
+    try { imagePath = await imgWidget.getPath() || undefined; }
+    catch(e) { toast('Image upload failed: ' + e.message, true); btn.textContent='💾 Save & Publish'; btn.disabled=false; return; }
+  }
 
   const item = {
     id: index >= 0 ? resources[index].id : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g,''),
@@ -490,8 +620,8 @@ async function saveResource(index) {
     title,
     meta: document.getElementById('f_meta').value.trim(),
     excerpt: document.getElementById('f_excerpt').value.trim(),
-    image: document.getElementById('f_image').value.trim() || undefined,
-    imageAlt: document.getElementById('f_imageAlt').value.trim() || undefined,
+    image: imagePath,
+    imageAlt: hasImage ? (document.getElementById('f_imageAlt').value.trim() || undefined) : undefined,
     linkUrl: document.getElementById('f_linkUrl').value.trim() || undefined,
     linkLabel: document.getElementById('f_linkLabel').value.trim() || undefined,
     downloadUrl: document.getElementById('f_downloadUrl').value.trim() || undefined,
@@ -504,8 +634,7 @@ async function saveResource(index) {
   if (index >= 0) resources[index] = item;
   else resources.unshift(item);
 
-  const btn = document.getElementById('saveResourceBtn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Saving…';
   try {
     await saveFile('resources', contentData.resources, `CMS: ${index >= 0 ? 'update' : 'add'} resource "${title}"`);
     toast('✓ Saved! Site will update in ~1 minute.');
@@ -605,33 +734,63 @@ function editTeamMember(group, index) {
           <option value="observer" ${m.highlight==='observer'?'selected':''}>Grey — Observer</option>
         </select>
       </div>` : ''}
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="f_hasPhoto" ${m.image ? 'checked' : ''} />
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Profile Photo</span>
+        <span style="font-size:.8rem;color:var(--muted);">Turn on to add a photo for this person</span>
+      </div>
+      <div id="teamImageSection" style="display:${m.image ? 'block' : 'none'}">
+        <div class="form-row">
+          <label>Photo</label>
+          <div id="teamImageWidget"></div>
+        </div>
+      </div>
       <div class="form-actions">
         <button class="btn btn-primary" id="saveTeamBtn">💾 Save</button>
         <button class="btn btn-outline" onclick="renderTeamPanel()">Cancel</button>
       </div>
     </div>`;
 
-  document.getElementById('saveTeamBtn').addEventListener('click', () => saveTeamMember(group, index));
+  let teamImgWidget = renderImageWidget('teamImageWidget', m.image || '');
+  document.getElementById('f_hasPhoto').addEventListener('change', e => {
+    document.getElementById('teamImageSection').style.display = e.target.checked ? 'block' : 'none';
+  });
+
+  document.getElementById('saveTeamBtn').addEventListener('click', () => saveTeamMember(group, index, teamImgWidget));
 }
 
-async function saveTeamMember(group, index) {
+async function saveTeamMember(group, index, imgWidget) {
   const list = contentData.team[group];
   const name = document.getElementById('f_name').value.trim();
   if (!name) { toast('Name is required', true); return; }
+
+  const btn = document.getElementById('saveTeamBtn');
+  btn.textContent = 'Uploading…'; btn.disabled = true;
+
+  const hasPhoto = document.getElementById('f_hasPhoto').checked;
+  let imagePath = undefined;
+  if (hasPhoto && imgWidget) {
+    try { imagePath = await imgWidget.getPath() || undefined; }
+    catch(e) { toast('Image upload failed: ' + e.message, true); btn.textContent='💾 Save'; btn.disabled=false; return; }
+  }
 
   const item = {
     id: index >= 0 ? list[index].id : name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''),
     name,
     role: document.getElementById('f_role').value.trim(),
+    image: imagePath,
   };
   const hl = document.getElementById('f_highlight');
   if (hl && hl.value) item.highlight = hl.value;
+  Object.keys(item).forEach(k => item[k] === undefined && delete item[k]);
 
   if (index >= 0) list[index] = item;
   else list.push(item);
 
-  const btn = document.getElementById('saveTeamBtn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Saving…';
   try {
     await saveFile('team', contentData.team, `CMS: ${index>=0?'update':'add'} team member "${name}"`);
     toast('✓ Saved!');
