@@ -14,6 +14,12 @@
       "id": "radiatu-khanplaye",
       "name": "Radiatu S. Khanplaye",
       "role": "Financial Officer"
+    },
+    {
+      "id": "daniel-test",
+      "name": "Daniel Test",
+      "role": "Test Role",
+      "image": "images/Daniel-N-Gayflor---MCP-.jpg"
     }
   ],
   "steering": [
