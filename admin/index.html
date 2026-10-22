@@ -238,38 +238,35 @@ const FILES = {
   partners:  'content/partners.json',
 };
 
-// Admin credentials — password stored as SHA-256 hash only
-const ADMINS = [
-  {
-    email: 'mrucsoplatform@gmail.com',
-    // SHA-256 of the password
-    hash: 'fa80107d43c416e98b2f17ca6a1099a46203266fc98a8b3ba31e6f358412633a',
-  },
-];
-// GitHub token used behind the scenes — not shown to users
-const _t = ['ghp_nwVwQBCuiqNPQ', 'bLEqASIkTNjLQSKOh3FHpo2'].join('');
-
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
-let token = '';
+let jwtToken = '';
+let jwtExpiry = 0;
 let currentPanel = 'resources';
-let contentData = {};   // { resources: {...}, team: {...}, partners: {...} }
-let fileSHAs = {};      // { resources: 'sha...', team: 'sha...', partners: 'sha...' }
+let contentData = {};
+let fileSHAs = {};
+let loginAttempts = 0;
+let loginLockedUntil = 0;
 
 // ═══════════════════════════════════════════════════════════
-// GITHUB API
+// GITHUB API  (routed through /api/github — PAT never in browser)
 // ═══════════════════════════════════════════════════════════
-async function ghFetch(path, opts = {}) {
-  const res = await fetch(`https://api.github.com${path}`, {
-    ...opts,
+async function ghFetch(ghPath, opts = {}) {
+  const [pathname, qs] = ghPath.split('?');
+  const proxyUrl = '/api/github?path=' + encodeURIComponent(pathname) + (qs ? '&' + qs : '');
+  const res = await fetch(proxyUrl, {
+    method: opts.method || 'GET',
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      ...(opts.headers || {}),
+      'Authorization': 'Bearer ' + jwtToken,
+      'Content-Type':  'application/json',
     },
+    body: opts.body || undefined,
   });
+  if (res.status === 401) {
+    logout();
+    throw new Error('Session expired — please sign in again.');
+  }
   if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
   return res.json();
 }
@@ -304,65 +301,111 @@ document.getElementById('loginBtn').addEventListener('click', login);
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 document.getElementById('logoutBtn').addEventListener('click', logout);
 
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
 async function login() {
-  const email = document.getElementById('emailInput').value.trim().toLowerCase();
-  const password = document.getElementById('passwordInput').value;
-  if (!email || !password) return;
-
-  document.getElementById('loginBtn').textContent = 'Checking…';
-  document.getElementById('loginError').style.display = 'none';
-
-  const hashed = await sha256(password);
-  const admin = ADMINS.find(a => a.email === email && a.hash === hashed);
-
-  if (!admin) {
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('loginBtn').textContent = 'Sign In →';
+  const now = Date.now();
+  if (now < loginLockedUntil) {
+    const s = Math.ceil((loginLockedUntil - now) / 1000);
+    showLoginError('Too many failed attempts. Try again in ' + s + ' seconds.');
     return;
   }
 
+  const email    = document.getElementById('emailInput').value.trim().toLowerCase();
+  const password = document.getElementById('passwordInput').value;
+  if (!email || !password) return;
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Signing in…';
+  btn.disabled = true;
+  document.getElementById('loginError').style.display = 'none';
+
   try {
-    token = _t;
-    const user = await ghFetch('/user');
-    localStorage.setItem('era_cms_session', '1');
+    const res = await fetch('/api/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      loginAttempts++;
+      if (loginAttempts >= 3) {
+        loginLockedUntil = Date.now() + 30000;
+        loginAttempts = 0;
+        showLoginError('Too many failed attempts. Locked for 30 seconds.');
+      } else {
+        showLoginError('Incorrect email or password.');
+      }
+      btn.textContent = 'Sign In →';
+      btn.disabled = false;
+      return;
+    }
+
+    loginAttempts = 0;
+    const { token, expiresAt } = await res.json();
+    jwtToken  = token;
+    jwtExpiry = expiresAt;
+    localStorage.setItem('era_cms_token',  token);
+    localStorage.setItem('era_cms_expiry', String(expiresAt));
+    localStorage.setItem('era_cms_email',  email);
+    localStorage.removeItem('era_cms_session'); // clear old session flag
+
     document.getElementById('userLabel').textContent = email;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loadPanel('resources');
   } catch(e) {
-    token = '';
-    document.getElementById('loginError').textContent = 'Could not connect to GitHub. Try again.';
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('loginBtn').textContent = 'Sign In →';
+    showLoginError('Connection error. Please try again.');
+    btn.textContent = 'Sign In →';
+    btn.disabled = false;
   }
 }
 
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
 function logout() {
+  jwtToken  = '';
+  jwtExpiry = 0;
+  localStorage.removeItem('era_cms_token');
+  localStorage.removeItem('era_cms_expiry');
+  localStorage.removeItem('era_cms_email');
   localStorage.removeItem('era_cms_session');
-  token = '';
   contentData = {};
-  fileSHAs = {};
+  fileSHAs    = {};
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
-  document.getElementById('emailInput').value = '';
+  document.getElementById('emailInput').value  = '';
   document.getElementById('passwordInput').value = '';
 }
 
-// Auto-login if session active
-if (localStorage.getItem('era_cms_session')) {
-  token = _t;
-  ghFetch('/user').then(user => {
-    document.getElementById('userLabel').textContent = document.getElementById('emailInput').value || 'Admin';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadPanel('resources');
-  }).catch(() => localStorage.removeItem('era_cms_session'));
-}
+// Auto-login if a valid (non-expired) token is stored
+(function() {
+  const storedToken  = localStorage.getItem('era_cms_token');
+  const storedExpiry = parseInt(localStorage.getItem('era_cms_expiry') || '0', 10);
+  const storedEmail  = localStorage.getItem('era_cms_email') || 'Admin';
+  if (storedToken && storedExpiry > Date.now()) {
+    jwtToken  = storedToken;
+    jwtExpiry = storedExpiry;
+    ghFetch('/user').then(() => {
+      document.getElementById('userLabel').textContent = storedEmail;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadPanel('resources');
+    }).catch(() => {
+      jwtToken  = '';
+      jwtExpiry = 0;
+      localStorage.removeItem('era_cms_token');
+      localStorage.removeItem('era_cms_expiry');
+    });
+  } else {
+    // Clear any stale tokens
+    localStorage.removeItem('era_cms_token');
+    localStorage.removeItem('era_cms_expiry');
+    localStorage.removeItem('era_cms_session');
+  }
+})();
 
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
@@ -386,9 +429,12 @@ function loadPanel(name) {
   else if (name === 'team') p = renderTeamPanel();
   else if (name === 'partners') p = renderPartnersPanel();
   if (p && p.catch) p.catch(err => {
-    main.innerHTML = `<div style="color:var(--terra);padding:1.5rem;background:var(--card);border-radius:var(--radius);border:1.5px solid var(--terra);">
-      <strong>Error loading panel:</strong><br>${err.message || err}
-    </div>`;
+    const errEl = document.createElement('div');
+    errEl.style.cssText = 'color:var(--terra);padding:1.5rem;background:var(--card);border-radius:var(--radius);border:1.5px solid var(--terra);';
+    errEl.innerHTML = '<strong>Error loading panel:</strong><br>';
+    errEl.appendChild(document.createTextNode(err.message || String(err)));
+    main.innerHTML = '';
+    main.appendChild(errEl);
   });
 }
 
@@ -644,7 +690,7 @@ function editResource(index) {
           <button type="button" class="rte-btn" data-cmd="createLink" title="Link">🔗 Link</button>
           <button type="button" class="rte-btn" data-cmd="removeFormat" title="Clear formatting">✕ Clear</button>
         </div>
-        <div id="f_body" class="rte-body" contenteditable="true">${r.body||''}</div>
+        <div id="f_body" class="rte-body" contenteditable="true"></div>
         <p class="rte-hint">Write the full article here. Use the toolbar above to format headings, bold, lists, and links. Leave blank if the article lives on a separate page.</p>
       </div>
       <div class="form-row">
@@ -664,6 +710,21 @@ function editResource(index) {
         <button class="btn btn-outline" onclick="renderResourcesPanel()" style="margin-left:auto;">Cancel</button>
       </div>
     </div>`;
+
+  // Safely inject article body into contenteditable (no raw innerHTML injection)
+  if (r.body) {
+    const bodyEl = document.getElementById('f_body');
+    if (typeof bodyEl.setHTML === 'function') {
+      bodyEl.setHTML(r.body);
+    } else {
+      // Basic sanitization: strip script tags and inline event handlers
+      const clean = r.body
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi, '')
+        .replace(/\bon\w+\s*=/gi, 'data-removed=')
+        .replace(/javascript\s*:/gi, 'blocked:');
+      bodyEl.innerHTML = clean;
+    }
+  }
 
   // Wire up image toggle
   let resourceImgWidget = renderImageWidget('resourceImageWidget', r.image || '', { maxKB: 500, ratioW: 16, ratioH: 9, ratioLabel: '16:9', hint: 'Max 500 KB · 16:9 landscape (e.g. 800×450 px)' });
@@ -686,8 +747,14 @@ function editResource(index) {
       else if (cmd === 'p') { document.execCommand('formatBlock', false, 'p'); }
       else if (cmd === 'blockquote') { document.execCommand('formatBlock', false, 'blockquote'); }
       else if (cmd === 'createLink') {
-        const url = prompt('Enter URL:');
-        if (url) document.execCommand('createLink', false, url);
+        const url = (prompt('Enter URL (must start with https://, http://, or /):') || '').trim();
+        if (url) {
+          if (/^https?:\/\//i.test(url) || url.startsWith('/')) {
+            document.execCommand('createLink', false, url);
+          } else {
+            toast('Invalid URL — must start with https://, http://, or /', true);
+          }
+        }
       }
       else { document.execCommand(cmd, false, null); }
     });
