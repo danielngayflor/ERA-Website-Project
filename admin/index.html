@@ -392,32 +392,69 @@ function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 
 // Renders an image upload widget into containerId.
 // existingPath: current value from JSON (e.g. "images/photo.jpg") or ''
+// constraints: { maxKB, ratioW, ratioH, ratioLabel, hint }  — all optional
 // Returns object with getPath() to read current value before save.
-function renderImageWidget(containerId, existingPath) {
+function renderImageWidget(containerId, existingPath, constraints) {
   const el = document.getElementById(containerId);
+  const cfg = constraints || {};
   let currentPath = existingPath || '';
-  let pendingFile = null; // { name, base64 }
+  let pendingFile = null;
+  let validationError = '';
+
+  function validateImage(file, dataUrl) {
+    return new Promise(resolve => {
+      if (cfg.maxKB && file.size > cfg.maxKB * 1024) {
+        resolve(`File is ${(file.size/1024).toFixed(0)} KB — maximum allowed is ${cfg.maxKB} KB. Please compress or resize the image.`);
+        return;
+      }
+      if (cfg.ratioW && cfg.ratioH) {
+        const img = new Image();
+        img.onload = () => {
+          const actualRatio = img.width / img.height;
+          const targetRatio = cfg.ratioW / cfg.ratioH;
+          const tolerance = 0.08;
+          if (Math.abs(actualRatio - targetRatio) > tolerance) {
+            resolve(`Image dimensions are ${img.width}×${img.height}px (ratio ${(actualRatio).toFixed(2)}:1). Required ratio is ${cfg.ratioLabel || cfg.ratioW+':'+cfg.ratioH} — please crop to that ratio before uploading.`);
+          } else {
+            resolve('');
+          }
+        };
+        img.src = dataUrl;
+      } else {
+        resolve('');
+      }
+    });
+  }
 
   function render() {
     el.innerHTML = `
       <div class="img-upload-area" id="${containerId}_drop">
         <input type="file" id="${containerId}_file" accept="image/*" />
         <div class="upload-icon">🖼️</div>
-        <div class="upload-text">Click to choose an image — JPG, PNG, WebP</div>
+        <div class="upload-text">Click to choose an image — JPG, PNG, WebP${cfg.hint ? '<br><span style="font-size:.75rem;opacity:.7;">'+cfg.hint+'</span>' : ''}</div>
       </div>
-      ${currentPath || pendingFile ? `
+      ${validationError ? `<p style="font-size:.82rem;color:var(--terra);margin-top:.5rem;line-height:1.5;">⚠️ ${validationError}</p>` : ''}
+      ${(currentPath || pendingFile) && !validationError ? `
         <div class="img-preview" id="${containerId}_preview">
           <img src="${pendingFile ? pendingFile.dataUrl : currentPath}" alt="preview" />
           <button class="remove-img" id="${containerId}_remove" title="Remove image">×</button>
         </div>` : ''}
-      ${currentPath && !pendingFile ? `<p style="font-size:.78rem;color:var(--muted);margin-top:.4rem;">Current: ${currentPath}</p>` : ''}
-      ${pendingFile ? `<p style="font-size:.78rem;color:#155724;margin-top:.4rem;">✓ New image ready to upload: ${pendingFile.name}</p>` : ''}`;
+      ${currentPath && !pendingFile && !validationError ? `<p style="font-size:.78rem;color:var(--muted);margin-top:.4rem;">Current: ${currentPath}</p>` : ''}
+      ${pendingFile && !validationError ? `<p style="font-size:.78rem;color:#155724;margin-top:.4rem;">✓ Ready to upload: ${pendingFile.name}</p>` : ''}`;
 
     document.getElementById(`${containerId}_file`).addEventListener('change', async e => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = ev => {
+      reader.onload = async ev => {
+        const err = await validateImage(file, ev.target.result);
+        if (err) {
+          validationError = err;
+          pendingFile = null;
+          render();
+          return;
+        }
+        validationError = '';
         pendingFile = { name: file.name, dataUrl: ev.target.result, file };
         currentPath = '';
         render();
@@ -592,12 +629,12 @@ function editResource(index) {
     </div>`;
 
   // Wire up image toggle
-  let resourceImgWidget = renderImageWidget('resourceImageWidget', r.image || '');
+  let resourceImgWidget = renderImageWidget('resourceImageWidget', r.image || '', { maxKB: 500, ratioW: 16, ratioH: 9, ratioLabel: '16:9', hint: 'Max 500 KB · 16:9 landscape (e.g. 800×450 px)' });
   document.getElementById('f_hasImage').addEventListener('change', e => {
     const section = document.getElementById('imageSection');
     section.style.display = e.target.checked ? 'block' : 'none';
     if (e.target.checked && !resourceImgWidget) {
-      resourceImgWidget = renderImageWidget('resourceImageWidget', '');
+      resourceImgWidget = renderImageWidget('resourceImageWidget', '', { maxKB: 500, ratioW: 16, ratioH: 9, ratioLabel: '16:9', hint: 'Max 500 KB · 16:9 landscape (e.g. 800×450 px)' });
     }
   });
 
@@ -760,7 +797,7 @@ function editTeamMember(group, index) {
       </div>
     </div>`;
 
-  let teamImgWidget = renderImageWidget('teamImageWidget', m.image || '');
+  let teamImgWidget = renderImageWidget('teamImageWidget', m.image || '', { maxKB: 500, ratioW: 1, ratioH: 1, ratioLabel: '1:1 square', hint: 'Max 500 KB · Square (e.g. 400×400 px)' });
   document.getElementById('f_hasPhoto').addEventListener('change', e => {
     document.getElementById('teamImageSection').style.display = e.target.checked ? 'block' : 'none';
   });
@@ -834,7 +871,7 @@ async function renderPartnersPanel() {
         <div class="item-card">
           <div class="item-card__info">
             <div class="item-card__title">${esc(p.name)}</div>
-            <div class="item-card__meta">${esc(p.logo)}</div>
+            <div class="item-card__meta">${p.logo ? `<img src="/${p.logo}" style="height:28px;max-width:120px;object-fit:contain;vertical-align:middle;" />` : '<span style="color:var(--muted);font-style:italic;">No logo</span>'}</div>
           </div>
           <div class="item-card__actions">
             <button class="btn btn-outline btn-sm" onclick="editPartner(${i})">Edit</button>
@@ -861,10 +898,19 @@ function editPartner(index) {
         <label>Organisation Name *</label>
         <input id="f_name" value="${esc(p.name||'')}" placeholder="e.g. Ford Foundation" />
       </div>
-      <div class="form-row">
-        <label>Logo image path</label>
-        <input id="f_logo" value="${esc(p.logo||'')}" placeholder="images/logo.png" />
-        <p class="hint">Path to logo in the images/ folder. Upload the file to GitHub first.</p>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="f_hasLogo" ${p.logo ? 'checked' : ''} />
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Logo Image</span>
+        <span style="font-size:.8rem;color:var(--muted);">Turn on to add a logo for this partner</span>
+      </div>
+      <div id="partnerLogoSection" style="display:${p.logo ? 'block' : 'none'}">
+        <div class="form-row">
+          <label>Logo</label>
+          <div id="partnerLogoWidget"></div>
+        </div>
       </div>
       <div class="form-row">
         <label>Website URL</label>
@@ -876,18 +922,33 @@ function editPartner(index) {
       </div>
     </div>`;
 
-  document.getElementById('savePartnerBtn').addEventListener('click', () => savePartner(index));
+  let partnerLogoWidget = renderImageWidget('partnerLogoWidget', p.logo || '', { maxKB: 500, ratioW: 3, ratioH: 1, ratioLabel: '3:1 wide', hint: 'Max 500 KB · Wide logo (e.g. 600×200 px, 3:1 ratio)' });
+  document.getElementById('f_hasLogo').addEventListener('change', e => {
+    document.getElementById('partnerLogoSection').style.display = e.target.checked ? 'block' : 'none';
+  });
+
+  document.getElementById('savePartnerBtn').addEventListener('click', () => savePartner(index, partnerLogoWidget));
 }
 
-async function savePartner(index) {
+async function savePartner(index, logoWidget) {
   const list = contentData.partners.partners;
   const name = document.getElementById('f_name').value.trim();
   if (!name) { toast('Name is required', true); return; }
 
+  const btn = document.getElementById('savePartnerBtn');
+  btn.textContent = 'Uploading…'; btn.disabled = true;
+
+  const hasLogo = document.getElementById('f_hasLogo').checked;
+  let logoPath = undefined;
+  if (hasLogo && logoWidget) {
+    try { logoPath = await logoWidget.getPath() || undefined; }
+    catch(e) { toast('Logo upload failed: ' + e.message, true); btn.textContent='💾 Save'; btn.disabled=false; return; }
+  }
+
   const item = {
     id: index >= 0 ? list[index].id : name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''),
     name,
-    logo: document.getElementById('f_logo').value.trim(),
+    logo: logoPath,
     url: document.getElementById('f_url').value.trim() || undefined,
   };
   Object.keys(item).forEach(k => item[k] === undefined && delete item[k]);
@@ -895,8 +956,7 @@ async function savePartner(index) {
   if (index >= 0) list[index] = item;
   else list.push(item);
 
-  const btn = document.getElementById('savePartnerBtn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Saving…';
   try {
     await saveFile('partners', contentData.partners, `CMS: ${index>=0?'update':'add'} partner "${name}"`);
     toast('✓ Saved!');
