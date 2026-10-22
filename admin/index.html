@@ -147,6 +147,19 @@
     .img-preview img { max-height: 140px; max-width: 100%; border-radius: 6px; border: 1px solid var(--border); display: block; }
     .img-preview .remove-img { position: absolute; top: -8px; right: -8px; background: var(--terra); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: .8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
 
+    /* ── Rich text editor ── */
+    .rte-toolbar { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .4rem; }
+    .rte-btn { background: #f4f4f0; border: 1px solid var(--border); border-radius: 4px; padding: .25rem .55rem; font-size: .8rem; font-weight: 700; cursor: pointer; line-height: 1.4; color: var(--text); }
+    .rte-btn:hover { background: var(--forest); color: #fff; border-color: var(--forest); }
+    .rte-body { min-height: 220px; border: 1.5px solid var(--border); border-radius: 6px; padding: .75rem .9rem; font-size: .93rem; font-family: inherit; line-height: 1.7; outline: none; background: #fff; }
+    .rte-body:focus { border-color: var(--forest); }
+    .rte-body h2 { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin: 1rem 0 .4rem; color: var(--forest); }
+    .rte-body h3 { font-size: 1rem; font-weight: 700; margin: .9rem 0 .3rem; }
+    .rte-body p  { margin-bottom: .75rem; }
+    .rte-body ul, .rte-body ol { padding-left: 1.4rem; margin-bottom: .75rem; }
+    .rte-body blockquote { border-left: 3px solid var(--terra); padding-left: .9rem; color: var(--muted); font-style: italic; margin: .75rem 0; }
+    .rte-hint { font-size: .77rem; color: var(--muted); margin-top: .3rem; }
+
     /* ── Category tile picker ── */
     .cat-picker { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .2rem; }
     .cat-tile { display: flex; align-items: center; gap: .5rem; padding: .45rem .85rem; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; font-size: .85rem; font-weight: 500; transition: .15s; user-select: none; background: #fff; }
@@ -531,7 +544,7 @@ async function renderResourcesPanel() {
         <div class="item-card">
           <div class="item-card__info">
             <div class="item-card__title">${esc(r.title)}</div>
-            <div class="item-card__meta">${esc(r.category)} · ${esc(r.meta||'')}</div>
+            <div class="item-card__meta">${esc(r.category)} · ${esc(r.meta||'')}${r.body ? ' · <span style="color:var(--forest);font-weight:600;">✍ Has article</span>' : ''}</div>
           </div>
           <span class="badge badge-${r.status === 'published' ? 'published' : 'draft'}">${r.status||'draft'}</span>
           <div class="item-card__actions">
@@ -618,18 +631,25 @@ function editResource(index) {
           <div id="resourceImageWidget"></div>
         </div>
       </div>
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Download URL (PDF)</label>
-          <input id="f_downloadUrl" value="${esc(r.downloadUrl||'')}" placeholder="downloads/report.pdf" />
+      <div class="form-row">
+        <label>Article Body</label>
+        <div class="rte-toolbar">
+          <button type="button" class="rte-btn" data-cmd="bold" title="Bold"><b>B</b></button>
+          <button type="button" class="rte-btn" data-cmd="italic" title="Italic"><i>I</i></button>
+          <button type="button" class="rte-btn" data-cmd="h2" title="Heading 2">H2</button>
+          <button type="button" class="rte-btn" data-cmd="h3" title="Heading 3">H3</button>
+          <button type="button" class="rte-btn" data-cmd="p" title="Paragraph">¶</button>
+          <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullet list">• List</button>
+          <button type="button" class="rte-btn" data-cmd="blockquote" title="Blockquote">" Quote</button>
+          <button type="button" class="rte-btn" data-cmd="createLink" title="Link">🔗 Link</button>
+          <button type="button" class="rte-btn" data-cmd="removeFormat" title="Clear formatting">✕ Clear</button>
         </div>
-        <div class="form-row">
-          <label>Status *</label>
-          <select id="f_status">
-            <option value="published" ${r.status==='published'?'selected':''}>Published</option>
-            <option value="draft" ${r.status!=='published'?'selected':''}>Draft (hidden)</option>
-          </select>
-        </div>
+        <div id="f_body" class="rte-body" contenteditable="true">${r.body||''}</div>
+        <p class="rte-hint">Write the full article here. Use the toolbar above to format headings, bold, lists, and links. Leave blank if the article lives on a separate page.</p>
+      </div>
+      <div class="form-row">
+        <label>Download URL (PDF)</label>
+        <input id="f_downloadUrl" value="${esc(r.downloadUrl||'')}" placeholder="downloads/report.pdf" />
       </div>
       <div class="form-row">
         <label>Show "External ↗" badge?</label>
@@ -639,8 +659,9 @@ function editResource(index) {
         </select>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" id="saveResourceBtn">💾 Save & Publish</button>
-        <button class="btn btn-outline" onclick="renderResourcesPanel()">Cancel</button>
+        <button class="btn btn-outline" id="saveDraftBtn">📝 Save as Draft</button>
+        <button class="btn btn-terra" id="publishBtn">🚀 Publish</button>
+        <button class="btn btn-outline" onclick="renderResourcesPanel()" style="margin-left:auto;">Cancel</button>
       </div>
     </div>`;
 
@@ -654,23 +675,48 @@ function editResource(index) {
     }
   });
 
-  document.getElementById('saveResourceBtn').addEventListener('click', () => saveResource(index, resourceImgWidget));
+  // Rich text toolbar
+  document.querySelectorAll('.rte-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmd = btn.dataset.cmd;
+      const body = document.getElementById('f_body');
+      body.focus();
+      if (cmd === 'h2') { document.execCommand('formatBlock', false, 'h2'); }
+      else if (cmd === 'h3') { document.execCommand('formatBlock', false, 'h3'); }
+      else if (cmd === 'p') { document.execCommand('formatBlock', false, 'p'); }
+      else if (cmd === 'blockquote') { document.execCommand('formatBlock', false, 'blockquote'); }
+      else if (cmd === 'createLink') {
+        const url = prompt('Enter URL:');
+        if (url) document.execCommand('createLink', false, url);
+      }
+      else { document.execCommand(cmd, false, null); }
+    });
+  });
+
+  document.getElementById('saveDraftBtn').addEventListener('click', () => saveResource(index, resourceImgWidget, 'draft'));
+  document.getElementById('publishBtn').addEventListener('click', () => saveResource(index, resourceImgWidget, 'published'));
 }
 
-async function saveResource(index, imgWidget) {
+async function saveResource(index, imgWidget, status) {
   const resources = contentData.resources.resources;
   const title = document.getElementById('f_title').value.trim();
   if (!title) { toast('Title is required', true); return; }
 
-  const btn = document.getElementById('saveResourceBtn');
-  btn.textContent = 'Uploading…'; btn.disabled = true;
+  const activeBtn = status === 'published'
+    ? document.getElementById('publishBtn')
+    : document.getElementById('saveDraftBtn');
+  const originalText = activeBtn.textContent;
+  activeBtn.textContent = 'Uploading…'; activeBtn.disabled = true;
 
   const hasImage = document.getElementById('f_hasImage').checked;
   let imagePath = undefined;
   if (hasImage && imgWidget) {
     try { imagePath = await imgWidget.getPath() || undefined; }
-    catch(e) { toast('Image upload failed: ' + e.message, true); btn.textContent='💾 Save & Publish'; btn.disabled=false; return; }
+    catch(e) { toast('Image upload failed: ' + e.message, true); activeBtn.textContent=originalText; activeBtn.disabled=false; return; }
   }
+
+  const bodyEl = document.getElementById('f_body');
+  const bodyHtml = bodyEl ? bodyEl.innerHTML.trim() : '';
 
   const item = {
     id: index >= 0 ? resources[index].id : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g,''),
@@ -679,13 +725,14 @@ async function saveResource(index, imgWidget) {
     title,
     meta: document.getElementById('f_meta').value.trim(),
     excerpt: document.getElementById('f_excerpt').value.trim(),
+    body: bodyHtml || undefined,
     image: imagePath,
     imageAlt: hasImage ? (document.getElementById('f_imageAlt').value.trim() || undefined) : undefined,
     linkUrl: document.getElementById('f_linkUrl').value.trim() || undefined,
     linkLabel: document.getElementById('f_linkLabel').value.trim() || undefined,
     downloadUrl: document.getElementById('f_downloadUrl').value.trim() || undefined,
     externalBadge: document.getElementById('f_externalBadge').value === 'true' || undefined,
-    status: document.getElementById('f_status').value,
+    status: status || 'draft',
   };
   // Remove undefined keys
   Object.keys(item).forEach(k => item[k] === undefined && delete item[k]);
@@ -693,14 +740,15 @@ async function saveResource(index, imgWidget) {
   if (index >= 0) resources[index] = item;
   else resources.unshift(item);
 
-  btn.textContent = 'Saving…';
+  activeBtn.textContent = 'Saving…';
   try {
-    await saveFile('resources', contentData.resources, `CMS: ${index >= 0 ? 'update' : 'add'} resource "${title}"`);
-    toast('✓ Saved! Site will update in ~1 minute.');
+    const verb = status === 'published' ? 'publish' : 'save draft';
+    await saveFile('resources', contentData.resources, `CMS: ${verb} resource "${title}"`);
+    toast(status === 'published' ? '✓ Published! Live in ~1 minute.' : '✓ Saved as draft.');
     renderResourcesPanel();
   } catch(e) {
     toast('Save failed: ' + e.message, true);
-    btn.textContent = '💾 Save & Publish'; btn.disabled = false;
+    activeBtn.textContent = originalText; activeBtn.disabled = false;
   }
 }
 
