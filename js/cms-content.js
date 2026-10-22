@@ -25,7 +25,7 @@ async function renderResources() {
 
   grid.innerHTML = resources.map(r => {
     const imgHtml = r.image
-      ? `<img class="c-resource-card__img" src="${r.image}" alt="${esc(r.imageAlt || r.title)}" />`
+      ? `<img class="c-resource-card__img" src="/${r.image}" alt="${esc(r.imageAlt || r.title)}" />`
       : '';
 
     const footerLinks = [];
@@ -107,26 +107,25 @@ async function renderTeam() {
     return;
   }
 
-  if (secretariatEl && data.secretariat) {
-    secretariatEl.innerHTML = data.secretariat.map(m => `
-<div class="c-team-member">
+  const memberHtml = (m, extraStyle = '') => `
+<div class="c-team-member"${extraStyle}>
+  ${m.image ? `<img src="/${m.image}" alt="${esc(m.name)}" style="width:72px;height:72px;object-fit:cover;border-radius:50%;display:block;margin-bottom:.75rem;border:2px solid var(--color-olive);" />` : ''}
   <p class="c-team-member__name">${esc(m.name)}</p>
   <p class="c-team-member__role">${esc(m.role)}</p>
-</div>`).join('\n');
+</div>`;
+
+  if (secretariatEl && data.secretariat) {
+    secretariatEl.innerHTML = data.secretariat.map(m => memberHtml(m)).join('\n');
   }
 
   if (steeringEl && data.steering) {
     steeringEl.innerHTML = data.steering.map(m => {
-      const borderStyle = m.highlight === 'chairman' || m.highlight === 'chair'
+      const style = m.highlight === 'chairman' || m.highlight === 'chair'
         ? ' style="border-left-color:var(--color-terra);"'
         : m.highlight === 'observer'
         ? ' style="border-left-color:var(--color-gray-3);"'
         : '';
-      return `
-<div class="c-team-member"${borderStyle}>
-  <p class="c-team-member__name">${esc(m.name)}</p>
-  <p class="c-team-member__role">${esc(m.role)}</p>
-</div>`;
+      return memberHtml(m, style);
     }).join('\n');
   }
 }
@@ -147,8 +146,8 @@ async function renderPartners() {
   }
 
   if (data.partners) {
-    logosEl.innerHTML = data.partners.map(p => {
-      const img = `<img src="${p.logo}" alt="${esc(p.name)}" class="c-donors__logo" />`;
+    logosEl.innerHTML = data.partners.filter(p => p.logo).map(p => {
+      const img = `<img src="/${p.logo}" alt="${esc(p.name)}" class="c-donors__logo" />`;
       return p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${img}</a>` : img;
     }).join('\n');
   }
