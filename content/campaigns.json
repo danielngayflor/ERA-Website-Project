@@ -1,0 +1,40 @@
+{
+  "campaigns": [
+    {
+      "id": "binding-agreement",
+      "title": "Binding Agreement",
+      "tag": "Campaign",
+      "excerpt": "Advocating for a legally binding international agreement to protect environmental human rights defenders across Africa.",
+      "linkUrl": "campaigns.html",
+      "linkLabel": "Learn More →",
+      "status": "published"
+    },
+    {
+      "id": "extractive-justice",
+      "title": "Extractive Justice",
+      "tag": "Campaign",
+      "excerpt": "Holding extractive industries accountable for environmental harm and ensuring affected communities receive justice.",
+      "linkUrl": "campaigns.html",
+      "linkLabel": "Learn More →",
+      "status": "published"
+    },
+    {
+      "id": "corporate-accountability",
+      "title": "Corporate Accountability",
+      "tag": "Campaign",
+      "excerpt": "Pushing for mandatory human rights and environmental due diligence obligations for corporations operating in Africa.",
+      "linkUrl": "campaigns.html",
+      "linkLabel": "Learn More →",
+      "status": "published"
+    },
+    {
+      "id": "defending-defenders",
+      "title": "Defending Defenders",
+      "tag": "Campaign",
+      "excerpt": "Protecting environmental human rights defenders from intimidation, criminalisation, and violence.",
+      "linkUrl": "campaigns.html",
+      "linkLabel": "Learn More →",
+      "status": "published"
+    }
+  ]
+}

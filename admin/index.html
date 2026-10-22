@@ -147,6 +147,12 @@
     .img-preview img { max-height: 140px; max-width: 100%; border-radius: 6px; border: 1px solid var(--border); display: block; }
     .img-preview .remove-img { position: absolute; top: -8px; right: -8px; background: var(--terra); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: .8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
 
+    /* ── Category tile picker ── */
+    .cat-picker { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .2rem; }
+    .cat-tile { display: flex; align-items: center; gap: .5rem; padding: .45rem .85rem; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; font-size: .85rem; font-weight: 500; transition: .15s; user-select: none; background: #fff; }
+    .cat-tile input[type=radio] { accent-color: var(--forest); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+    .cat-tile:has(input:checked) { border-color: var(--forest); background: #f0f4ee; color: var(--forest); font-weight: 700; }
+
     /* ── Loading ── */
     .loading { text-align: center; padding: 3rem; color: var(--muted); }
 
@@ -193,6 +199,7 @@
       <nav>
         <div class="nav-section">Content</div>
         <a href="#" data-panel="resources" class="nav-link active">📰 Resources</a>
+        <a href="#" data-panel="campaigns" class="nav-link">📣 Campaigns</a>
         <a href="#" data-panel="team" class="nav-link">👥 Team Members</a>
         <a href="#" data-panel="partners" class="nav-link">🤝 Partners & Donors</a>
       </nav>
@@ -213,6 +220,7 @@ const REPO = 'danielngayflor/ERA-Website-Project';
 const BRANCH = 'main';
 const FILES = {
   resources: 'content/resources.json',
+  campaigns: 'content/campaigns.json',
   team:      'content/team.json',
   partners:  'content/partners.json',
 };
@@ -361,6 +369,7 @@ function loadPanel(name) {
   main.innerHTML = '<div class="loading">Loading…</div>';
   let p;
   if (name === 'resources') p = renderResourcesPanel();
+  else if (name === 'campaigns') p = renderCampaignsPanel();
   else if (name === 'team') p = renderTeamPanel();
   else if (name === 'partners') p = renderPartnersPanel();
   if (p && p.catch) p.catch(err => {
@@ -546,17 +555,24 @@ function editResource(index) {
       <h2>${isNew ? 'Add Resource' : 'Edit Resource'}</h2>
     </div>
     <div class="form-card">
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Title *</label>
-          <input id="f_title" value="${esc(r.title||'')}" placeholder="Resource headline" />
-        </div>
-        <div class="form-row">
-          <label>Category *</label>
-          <select id="f_category">
-            ${['story','casestudy','newsletter','opinion','external'].map(c =>
-              `<option value="${c}" ${r.category===c?'selected':''}>${c}</option>`).join('')}
-          </select>
+      <div class="form-row">
+        <label>Title *</label>
+        <input id="f_title" value="${esc(r.title||'')}" placeholder="Resource headline" />
+      </div>
+      <div class="form-row">
+        <label>Category *</label>
+        <div class="cat-picker">
+          ${[
+            {value:'story',      label:'Stories'},
+            {value:'casestudy',  label:'Case Studies'},
+            {value:'newsletter', label:'ERA Magazines'},
+            {value:'opinion',    label:'Opinion Pieces'},
+            {value:'external',   label:'External Resources'},
+          ].map(c => `
+            <label class="cat-tile">
+              <input type="radio" name="f_category" value="${c.value}" ${(r.category||'story')===c.value?'checked':''} />
+              ${c.label}
+            </label>`).join('')}
         </div>
       </div>
       <div class="form-grid-2">
@@ -658,7 +674,7 @@ async function saveResource(index, imgWidget) {
 
   const item = {
     id: index >= 0 ? resources[index].id : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g,''),
-    category: document.getElementById('f_category').value,
+    category: (document.querySelector('input[name="f_category"]:checked') || {}).value || 'story',
     tag: document.getElementById('f_tag').value.trim(),
     title,
     meta: document.getElementById('f_meta').value.trim(),
@@ -972,6 +988,170 @@ async function deletePartner(index) {
     await saveFile('partners', contentData.partners, `CMS: remove partner "${p.name}"`);
     toast('✓ Removed.');
     renderPartnersPanel();
+  } catch(e) { toast('Failed: ' + e.message, true); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CAMPAIGNS PANEL
+// ═══════════════════════════════════════════════════════════
+async function renderCampaignsPanel() {
+  const main = document.getElementById('mainContent');
+  const data = contentData.campaigns || await getFile('campaigns');
+  const campaigns = data.campaigns || [];
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>Campaigns</h2>
+      <p>Active campaigns shown on the Campaigns page.</p>
+    </div>
+    <button class="btn btn-primary" id="addCampaignBtn">+ Add Campaign</button>
+    <br/><br/>
+    <div class="item-list">
+      ${campaigns.map((c, i) => `
+        <div class="item-card">
+          ${c.image ? `<img src="/${c.image}" style="width:56px;height:42px;object-fit:cover;border-radius:4px;flex-shrink:0;" />` : ''}
+          <div class="item-card__info">
+            <div class="item-card__title">${esc(c.title)}</div>
+            <div class="item-card__meta">${esc(c.tag||'')}${c.tag && c.linkUrl ? ' · ' : ''}${esc(c.linkUrl||'')}</div>
+          </div>
+          <span class="badge badge-${c.status==='published'?'published':'draft'}">${c.status||'draft'}</span>
+          <div class="item-card__actions">
+            <button class="btn btn-outline btn-sm" onclick="editCampaign(${i})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCampaign(${i})">Delete</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  document.getElementById('addCampaignBtn').addEventListener('click', () => editCampaign(-1));
+}
+
+function editCampaign(index) {
+  const campaigns = contentData.campaigns.campaigns || [];
+  const c = index >= 0 ? campaigns[index] : {};
+  const isNew = index < 0;
+  const main = document.getElementById('mainContent');
+
+  main.innerHTML = `
+    <div class="panel-header">
+      <h2>${isNew ? 'Add Campaign' : 'Edit Campaign'}</h2>
+    </div>
+    <div class="form-card">
+      <div class="form-row">
+        <label>Title *</label>
+        <input id="f_title" value="${esc(c.title||'')}" placeholder="Campaign name" />
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Tag label</label>
+          <input id="f_tag" value="${esc(c.tag||'Campaign')}" placeholder="e.g. Campaign, Initiative" />
+        </div>
+        <div class="form-row">
+          <label>Status *</label>
+          <select id="f_status">
+            <option value="published" ${c.status==='published'?'selected':''}>Published</option>
+            <option value="draft" ${c.status!=='published'?'selected':''}>Draft (hidden)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Short description *</label>
+        <textarea id="f_excerpt" rows="3" placeholder="1–2 sentence summary shown on campaign card">${esc(c.excerpt||'')}</textarea>
+      </div>
+      <div class="form-row">
+        <label>Full description</label>
+        <textarea id="f_description" rows="5" placeholder="Longer campaign description (optional)">${esc(c.description||'')}</textarea>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Link URL</label>
+          <input id="f_linkUrl" value="${esc(c.linkUrl||'')}" placeholder="campaigns.html#section or https://..." />
+          <p class="hint">Page anchor or full URL for the "Learn More" button</p>
+        </div>
+        <div class="form-row">
+          <label>Link label</label>
+          <input id="f_linkLabel" value="${esc(c.linkLabel||'Learn More →')}" />
+        </div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="f_hasImage" ${c.image ? 'checked' : ''} />
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Campaign Image</span>
+        <span style="font-size:.8rem;color:var(--muted);">Turn on to add a banner image</span>
+      </div>
+      <div id="campaignImageSection" style="display:${c.image ? 'block' : 'none'}">
+        <div class="form-row">
+          <label>Image alt text</label>
+          <input id="f_imageAlt" value="${esc(c.imageAlt||'')}" placeholder="Describe the image for screen readers" />
+        </div>
+        <div class="form-row">
+          <label>Image</label>
+          <div id="campaignImageWidget"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="saveCampaignBtn">💾 Save</button>
+        <button class="btn btn-outline" onclick="renderCampaignsPanel()">Cancel</button>
+      </div>
+    </div>`;
+
+  let campaignImgWidget = renderImageWidget('campaignImageWidget', c.image || '', { maxKB: 500, ratioW: 16, ratioH: 9, ratioLabel: '16:9', hint: 'Max 500 KB · 16:9 landscape (e.g. 1200×675 px)' });
+  document.getElementById('f_hasImage').addEventListener('change', e => {
+    document.getElementById('campaignImageSection').style.display = e.target.checked ? 'block' : 'none';
+  });
+
+  document.getElementById('saveCampaignBtn').addEventListener('click', () => saveCampaign(index, campaignImgWidget));
+}
+
+async function saveCampaign(index, imgWidget) {
+  const campaigns = contentData.campaigns.campaigns;
+  const title = document.getElementById('f_title').value.trim();
+  if (!title) { toast('Title is required', true); return; }
+
+  const btn = document.getElementById('saveCampaignBtn');
+  btn.textContent = 'Uploading…'; btn.disabled = true;
+
+  const hasImage = document.getElementById('f_hasImage').checked;
+  let imagePath = undefined;
+  if (hasImage && imgWidget) {
+    try { imagePath = await imgWidget.getPath() || undefined; }
+    catch(e) { toast('Image upload failed: ' + e.message, true); btn.textContent='💾 Save'; btn.disabled=false; return; }
+  }
+
+  const item = {
+    id: index >= 0 ? campaigns[index].id : title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''),
+    title,
+    tag: document.getElementById('f_tag').value.trim() || undefined,
+    excerpt: document.getElementById('f_excerpt').value.trim(),
+    description: document.getElementById('f_description').value.trim() || undefined,
+    image: imagePath,
+    imageAlt: hasImage ? (document.getElementById('f_imageAlt').value.trim() || undefined) : undefined,
+    linkUrl: document.getElementById('f_linkUrl').value.trim() || undefined,
+    linkLabel: document.getElementById('f_linkLabel').value.trim() || undefined,
+    status: document.getElementById('f_status').value,
+  };
+  Object.keys(item).forEach(k => item[k] === undefined && delete item[k]);
+
+  if (index >= 0) campaigns[index] = item;
+  else campaigns.unshift(item);
+
+  btn.textContent = 'Saving…';
+  try {
+    await saveFile('campaigns', contentData.campaigns, `CMS: ${index>=0?'update':'add'} campaign "${title}"`);
+    toast('✓ Saved!');
+    renderCampaignsPanel();
+  } catch(e) { toast('Save failed: ' + e.message, true); btn.textContent='💾 Save'; btn.disabled=false; }
+}
+
+async function deleteCampaign(index) {
+  const c = contentData.campaigns.campaigns[index];
+  if (!confirm(`Delete campaign "${c.title}"? This cannot be undone.`)) return;
+  contentData.campaigns.campaigns.splice(index, 1);
+  try {
+    await saveFile('campaigns', contentData.campaigns, `CMS: delete campaign "${c.title}"`);
+    toast('✓ Deleted.');
+    renderCampaignsPanel();
   } catch(e) { toast('Failed: ' + e.message, true); }
 }
 </script>
